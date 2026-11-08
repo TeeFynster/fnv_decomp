@@ -184,7 +184,7 @@ bool FORenderedMenu::CreateMenuLight(const char* nodeName, ShadowSceneNode* shad
             }
             else
             {
-                Warning("MENUS: FORenderedMenu::CreateMenuLight could not find light node '%s' in the rendered menu",
+                Warning("MENUS: FORenderedMenu::CreateMenuLight could not find light node '%s' in the rendered menu with mesh '%s'",
                         nodeName, (const char*)GetMenuRoot()->GetName());
             }
         }
@@ -425,7 +425,7 @@ void __fastcall StartRenderedMenuShudder(FORenderedMenu* menu, float afDuration,
 {
     menu->m_bBurstSoundPlayed = true;
     menu->m_fShudderDuration = afDuration;
-    menu->m_fShudderFrequency = afIntensity * (double)0.0001f;
+    menu->m_fShudderFrequency = afIntensity * (double)0.001f;
     menu->m_fShudderIntensity = (float)g_timeGlobal.GetTimeStamp();
     menu->m_fVerticalHoldDuration = 0.0f;
 }

@@ -1,3 +1,6 @@
+extern "C" unsigned char DAT_01188694[];
+extern "C" unsigned char DAT_01188698[];
+
 #include "../../include/SettingT.h"
 
 // src/fallout_shared/bgssceneinfo.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bgssceneinfo.cpp).
@@ -373,8 +376,8 @@ void __cdecl BGSSceneInfo_ReloadBudgetCaps()
     int i;
     for (i = 0; i < 0x10; ++i)
     {
-        ::SettingT<INISettingCollection>::GetCollection()->ReadSetting(**(Setting**)(0x01188694 + i * 0x14));
-        ::SettingT<INISettingCollection>::GetCollection()->ReadSetting(**(Setting**)(0x01188698 + i * 0x14));
+        ::SettingT<INISettingCollection>::GetCollection()->ReadSetting(**(Setting**)((int)DAT_01188694 + i * 0x14));
+        ::SettingT<INISettingCollection>::GetCollection()->ReadSetting(**(Setting**)((int)DAT_01188698 + i * 0x14));
     }
 }
 

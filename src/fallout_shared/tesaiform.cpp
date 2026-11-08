@@ -32,7 +32,7 @@ struct PackedRecordData
 // Retained locally: the shared TESAIForm destructor invokes PackageList::~PackageList
 // bound to 0x0046ffb0, whereas this unit requires the destructor at 0x0067e3a0.
 #include "../../include/SettingT_GameSettingCollection_.h"
-#include "../../include/TESSaveLoadGame.h"
+#include "../../include/TESSaveLoadGameGlobals.h"
 class GameSettingCollection;
 using ::SettingT;
 class GlobalObject_0040e0b0
@@ -560,7 +560,7 @@ bool FUN_0047efe0_shell::HasFlags(int aiFlags)
 }
 
 
-TESSaveLoadGame* g_TESSaveLoadGame;
+
 
 struct FUN_0047f8c0_shell
 {

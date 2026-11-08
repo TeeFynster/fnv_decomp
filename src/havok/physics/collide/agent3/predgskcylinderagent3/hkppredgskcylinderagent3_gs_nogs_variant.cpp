@@ -141,8 +141,8 @@ static void convertCylinderCacheToCapsuleCache(D40AF0State* s, D40AF0Mask* m);
 void D40AF0Caller(D40AF0State* s, D40AF0Mask* m);
 void __fastcall FUN_00c905b0(void* selfVal);
 static void restoreOriginalShapesInCdBodies(void** vals, void** slots);
-void** volatile g_d409d0_vals;
-void** volatile g_d409d0_slots;
+extern void** volatile g_d409d0_vals;
+extern void** volatile g_d409d0_slots;
 void d409d0_probe_caller(void);
 inline void* operator new(unsigned int, void* p) throw()
 {

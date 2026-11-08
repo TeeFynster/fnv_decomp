@@ -57,7 +57,7 @@ static const char s_sz47[] = "NiPSysSphericalCollider";
 static const char s_sz48[] = "NiPSysTurbulenceFieldModifier";
 static const char s_sz49[] = "NiPSysUpdateCtlr";
 static const char s_sz50[] = "NiPSysVortexFieldModifier";
-extern const char g_szShutdownEnd[] = "";
+__declspec(selectany) extern const char g_szShutdownEnd[] = "";
 
 // @fnv 0x00c1a7d0
 // src: COMMUNITY 0x00c1a7d0

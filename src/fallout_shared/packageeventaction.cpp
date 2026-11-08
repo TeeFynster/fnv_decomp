@@ -99,7 +99,7 @@ void PackageEventActionData_packageeventaction::InitItem(TESForm* owner)
         errors = Warning();
         BGSMessageWarningAuxiliary(oldWarning);
         if (errors)
-            Warning("MASTERFILE: Errors were encountered during InitItem for result script on eventaction for package",
+            Warning("MASTERFILE: Errors were encountered during InitItem for result script on eventaction for package '%s' (%08X)\n\nSee Warnings file for more information.",
                     owner->GetName(), owner->GetFormID());
     }
 }

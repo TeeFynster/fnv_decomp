@@ -77,7 +77,7 @@ void BGSMessage::InitItem()
         if (locals.conditionErrors)
         {
             Warning(
-                "MASTERFILE: Errors were encountered during InitItem for conditions on menu item %d for terminal '%s' (%08X)",
+                "MASTERFILE: Errors were encountered during InitItem for conditions on menu item %d for terminal '%s' (%08X)\n\nSee Warnings file for more information.",
                 locals.buttonIndex, GetName(), GetFormID());
         }
         ++locals.buttonIndex;

@@ -444,7 +444,7 @@ struct G7d1
 {
     bool GetBoolValue();
 };
-G7d1 g_011c726c;
+extern G7d1 g_011c726c;
 void TESRenderer_GetUseShaders();
 struct MyArr_GetAt
 {
@@ -955,7 +955,7 @@ unsigned int __cdecl NiDX9Renderer_GetDirect3D();
 unsigned char __cdecl BSShaderManager_GetUseRefractionShader();
 extern int DAT_011f94b8;
 int __cdecl BSRenderState_GetGPUVendor();
-char* DAT_01202fa0;
+extern char* DAT_01202fa0;
 char** BSUtilities_GetPersonalPath();
 extern int DAT_011c6fbc;
 int __cdecl TESRenderer_GetHWND();

@@ -3066,7 +3066,7 @@ struct S_00cc4b90_Tls
     int unk2b0;
     int ctx;
 };
-__declspec(thread) S_00cc4b90_Tls DAT_tls;
+extern __declspec(thread) S_00cc4b90_Tls DAT_tls;
 struct S_00cc4b90_Ctx
 {
     int saved;
@@ -7646,7 +7646,7 @@ struct TaskTls
     int unk2B0;
     int context;
 };
-__declspec(thread) TaskTls g_taskTls;
+extern __declspec(thread) TaskTls g_taskTls;
 struct Output403
 {
     virtual void v00();
@@ -10699,7 +10699,7 @@ struct FUN_00cca130_cls : CcaOwner
 {
     void ProcessArg(CcaArg* a1);
 };
-__declspec(thread) unsigned int DAT_0126fd98;
+extern __declspec(thread) unsigned int DAT_0126fd98;
 struct FUN_00cca450_param_item
 {
     void* unk00;
@@ -11588,7 +11588,7 @@ class DerivedCCE : public BaseCCE
   public:
     bool ProcessWithTarget(ArgCCE* pkArg);
 };
-__declspec(thread) unsigned int currentAllocationContext = 0x3b;
+extern __declspec(thread) unsigned int currentAllocationContext;
 struct ThreadContextGuard
 {
     unsigned int oldValue;
@@ -13745,9 +13745,9 @@ struct T
     unsigned short m_20;
 };
 static T* getAnyNonFixedIsland(T* a, T* b);
-T* volatile g_a;
-T* volatile g_b;
-T* volatile g_sink;
+extern T* volatile g_a;
+extern T* volatile g_b;
+extern T* volatile g_sink;
 void caller();
 extern int DAT_010c93fc;
 void* __cdecl Object_DispatchCommandFour(unsigned int size);

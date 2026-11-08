@@ -234,7 +234,7 @@ struct Frame00b1d5d0
     int* p8;
     int* p4;
 };
-unsigned int g_010173f0;
+extern unsigned int g_010173f0;
 struct StringLike
 {
     void __thiscall Clear(bool, unsigned int);

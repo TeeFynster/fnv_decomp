@@ -3043,7 +3043,7 @@ struct S_00cc4b90_Tls
     int unk2b0;
     int ctx;
 };
-__declspec(thread) S_00cc4b90_Tls DAT_tls;
+extern __declspec(thread) S_00cc4b90_Tls DAT_tls;
 struct S_00cc4b90_Ctx
 {
     int saved;
@@ -10852,7 +10852,7 @@ struct FUN_00cca130_cls : CcaOwner
 {
     void ProcessArg(CcaArg* a1);
 };
-__declspec(thread) unsigned int DAT_0126fd98;
+extern __declspec(thread) unsigned int DAT_0126fd98;
 struct FUN_00cca450_param_item
 {
     void* unk00;
@@ -11747,7 +11747,7 @@ class DerivedCCE : public BaseCCE
   public:
     bool ProcessWithTarget(ArgCCE* pkArg);
 };
-__declspec(thread) unsigned int currentAllocationContext = 0x3b;
+extern __declspec(thread) unsigned int currentAllocationContext;
 struct ThreadContextGuard
 {
     unsigned int oldValue;

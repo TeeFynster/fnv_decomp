@@ -117,7 +117,7 @@ LocalM128 _mm_set_ss(float);
 
 
 
-extern const float DAT_0104da4c = 1.1920928955078125e-7f;
+__declspec(selectany) extern const float DAT_0104da4c = 1.1920928955078125e-7f;
 
 struct __declspec(align(16)) FnvVec {
     float x;

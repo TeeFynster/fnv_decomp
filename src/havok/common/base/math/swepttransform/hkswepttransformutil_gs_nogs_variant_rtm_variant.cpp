@@ -373,7 +373,7 @@ struct S_00cf10f0_Tls
     int unk2b0;
     int ctx;
 };
-__declspec(thread) S_00cf10f0_Tls DAT_tls;
+extern __declspec(thread) S_00cf10f0_Tls DAT_tls;
 struct S_00cf10f0_Ctx
 {
     int saved;

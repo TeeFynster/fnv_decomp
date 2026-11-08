@@ -3897,7 +3897,7 @@ struct LocTriangulator
 #include <math.h>
 extern LocalM128 DAT_010ec7f0;
 extern const float DAT_010141cc;
-extern const float DAT_0104da4c = 1.1920928955078125e-7f;
+__declspec(selectany) extern const float DAT_0104da4c = 1.1920928955078125e-7f;
 struct EVec
 {
     float x, y, z, w;

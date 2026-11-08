@@ -77,7 +77,7 @@ void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 struct GlobalObjectO2_00a7b610
 {
 };
-GlobalObjectO2_00a7b610 g_012681b4;
+extern GlobalObjectO2_00a7b610 g_012681b4;
 struct FUN_0066d610_shell
 {
     GlobalObjectO2_00a7b610* GetGlobalObject();
@@ -827,7 +827,7 @@ struct TlsBlock_t
     int unk2B0;
     int m_2b4;
 };
-__declspec(thread) TlsBlock_t g_tlsBlock;
+extern __declspec(thread) TlsBlock_t g_tlsBlock;
 struct TlsGuard_t
 {
     int m_saved;
@@ -1123,7 +1123,7 @@ struct S_00caaf40_Tls
     int unk2b0;
     int ctx;
 };
-__declspec(thread) S_00caaf40_Tls DAT_tls;
+extern __declspec(thread) S_00caaf40_Tls DAT_tls;
 struct S_00caaf40_Ctx
 {
     int saved;
@@ -2489,7 +2489,7 @@ using ::_mm_mul_ps;
 using ::_mm_add_ps;
 }
 
-extern "C" const float DAT_01016248 = 0.5f;
+extern "C" __declspec(selectany) const float DAT_01016248 = 0.5f;
 
 struct BoundsTarget
 {

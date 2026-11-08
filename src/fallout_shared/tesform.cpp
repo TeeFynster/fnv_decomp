@@ -1038,7 +1038,7 @@ bool FUN_004854e0_shell::IsGroupFormOfType(FormRecordHeader* apGroupFORM, bool a
     bool bretval = false;
     if (apGroupFORM && apGroupFORM->form == kGroupFormType && apGroupFORM->iFormID == 0)
     {
-        if (apGroupFORM->flags == *(unsigned int*)(this->GetFormType() * 0xc + 0x1187008))
+        if (apGroupFORM->flags == *(unsigned int*)(this->GetFormType() * 0xc + (int)DAT_01187008))
             bretval = true;
     }
     return bretval;
@@ -2132,7 +2132,7 @@ void FUN_00485530_shell::InitGroupForm(FormRecordHeader* apOutGroupFORM, GroupDa
     {
         apOutGroupFORM->form = kGroupFormType;
         apOutGroupFORM->iFormID = 0;
-        apOutGroupFORM->flags = *(unsigned int*)(0x1187008 + GetFormType() * 12);
+        apOutGroupFORM->flags = *(unsigned int*)((int)DAT_01187008 + GetFormType() * 12);
         apOutGroupFORM->length = 0;
         apOutGroupFORM->m_uiVersionControlInfo = 0;
         apOutGroupFORM->m_usFormVersion = 0;

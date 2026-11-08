@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define ProcessAcquire ProcessAcquire_fnv_00907d90
+
 // src/fallout/ai/lowprocess_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/fallout/ai/lowprocess.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /Od /Oy- /GS /EHsc /Gy /GF (unit lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton.
 

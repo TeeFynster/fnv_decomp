@@ -17,7 +17,7 @@ enum
 {
     kPreloadDecalDataSourceLine = 0x11f
 };
-NiPointer<QueuedFile> BSTempEffectSimpleDecal::ms_pPreloadDecalDataFile;
+
 
 #include <math.h>
 inline float NiSqrt(float fValue)

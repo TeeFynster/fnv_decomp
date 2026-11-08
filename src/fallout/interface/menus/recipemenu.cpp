@@ -8,7 +8,7 @@
 #include "../../../../include/Tile.h"
 #include "../../../../include/VATSMenu.h"
 #include "../../../../include/TESObjectARMO.h"
-#include "../../../../include/GameTimerRecord.h"
+#include "../../../../include/GameTimerRecordGlobals.h"
 #include "../../../../include/TESFullName.h"
 #include "../../../../include/RecipeMenu.h"
 #include "../../../../include/Menu.h"

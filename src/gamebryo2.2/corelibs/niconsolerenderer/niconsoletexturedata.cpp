@@ -1,3 +1,5 @@
+extern "C" void* const DAT_010a080c[];
+
 #include "../../../../include/NiRefObject.h"
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -14,7 +16,7 @@ extern "C" void _delete(void* p, unsigned int size);
 void* __thiscall NiTexture_RendererData::FUN_00a981a0(unsigned int flags)
 {
     NiTexture_RendererData* pThis = this;
-    *reinterpret_cast<void**>(pThis) = reinterpret_cast<void*>(0x010a080c);
+    *reinterpret_cast<void**>(pThis) = (void*)DAT_010a080c;
     pThis->NiRefObject::~NiRefObject();
     if (flags & 1)
         _delete(pThis, 0x60);

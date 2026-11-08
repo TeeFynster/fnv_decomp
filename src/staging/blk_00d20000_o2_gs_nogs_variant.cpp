@@ -414,7 +414,7 @@ static __declspec(noinline) void InitFuncsA(AgentFuncsD3D* pkFuncs)
     pkFuncs->m_bA = true;
     pkFuncs->m_bB = false;
 }
-void (*g_apfnInitD3D[2])(AgentFuncsD3D*) = { InitFuncsA, InitFuncsB };
+extern void (*g_apfnInitD3D[2])(AgentFuncsD3D*);
 class DispatcherD3D {
 public:
     void RegisterAgent(AgentFuncsD3D* pkFuncs, int iA, int iB);

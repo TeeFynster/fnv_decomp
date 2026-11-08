@@ -1,3 +1,6 @@
+class Setting;
+extern "C" Setting DAT_011de0a4;
+
 // fallout/misc/saveload/bgssaveloadhistory.cpp: SaveLoadChangeHistory (12 functions)
 
 #include "../../../../include/NiTPointerMap.h"
@@ -55,7 +58,7 @@ void SaveLoadChangeHistory::AddNoteWithArguments(const char* format, char* argum
 {
     BGSSaveLoadHistoryNoteLocals locals;
     int length;
-    if (!*reinterpret_cast<unsigned char*>(reinterpret_cast<Setting*>(0x11de0a4)->Bool()))
+    if (!*reinterpret_cast<unsigned char*>(DAT_011de0a4.Bool()))
         return;
     length = BSvsprintf(locals.buffer, format, arguments);
     if (length > 0)

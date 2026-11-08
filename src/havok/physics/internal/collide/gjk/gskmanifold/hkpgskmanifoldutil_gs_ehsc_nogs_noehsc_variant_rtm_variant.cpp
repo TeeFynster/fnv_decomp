@@ -155,10 +155,10 @@ static __forceinline __m128 Dot3_3vs3(const __m128& a0, const __m128& b0, const 
     return _mm_add_ps(_mm_add_ps(m0, m1), m2);
 }
 static int Object_ProcessAndReturnValue_00dad720(S_00dad720_Rec* rec, S_00dad720_Vec* vecs, S_00dad720_Out* out);
-volatile int g_rec;
-volatile int g_vecs;
-volatile int g_out;
-volatile int g_res;
+extern volatile int g_rec;
+extern volatile int g_vecs;
+extern volatile int g_out;
+extern volatile int g_res;
 void CallTarget_dad720();
 #include <xmmintrin.h>
 struct S_00dae220_Entry

@@ -4432,7 +4432,7 @@ extern bool DAT_012003cc;
 extern NiPoint3 DAT_012003d4;
 extern NiPoint3 DAT_012003e0;
 
-// Compares the object's current scale vectors against stored ones, sets DAT_012003cc when any component ratio exceeds 1.1, and stores the new vectors.
+// Compares the object's current scale vectors against stored ones, sets DAT_012003cc when any component ratio exceeds 0.01, and stores the new vectors.
 // @fnv 0x008744a0
 // src: COMMUNITY 0x008744a0
 void __cdecl ImageSpaceEffectFullScreenBlur_CheckCamera(ScaleSource* apScaleSource)
@@ -4449,8 +4449,8 @@ void __cdecl ImageSpaceEffectFullScreenBlur_CheckCamera(ScaleSource* apScaleSour
     NiPoint3 kDiffB5 = kCurB - DAT_012003d4;
     ::NiPoint3 kRatioA(kDiffA_2.x / DAT_012003e0.x, kDiffA_2.y / DAT_012003e0.y, kDiffA_2.z / DAT_012003e0.z);
     ::NiPoint3 kRatioB4(kDiffB5.x / DAT_012003d4.x, kDiffB5.y / DAT_012003d4.y, kDiffB5.z / DAT_012003d4.z);
-    if (kRatioA.x > 1.1 || kRatioA.y > 1.1 || kRatioA.z > 1.1 || kRatioB4.x > 1.1 || kRatioB4.y > 1.1 ||
-        kRatioB4.z > 1.1)
+    if (kRatioA.x > 0.01 || kRatioA.y > 0.01 || kRatioA.z > 0.01 || kRatioB4.x > 0.01 || kRatioB4.y > 0.01 ||
+        kRatioB4.z > 0.01)
     {
         DAT_012003cc = true;
     }

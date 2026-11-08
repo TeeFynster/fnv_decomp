@@ -926,8 +926,8 @@ __forceinline SweepPair* collideOneT<false>(const SweepBounds* bounds, const Swe
 int __cdecl CollideSweepBounds(const SweepBounds* a1, int count1, const SweepBounds* a2, int count2,
                                SweepPair* __restrict pairs, int capacity, int& skipped);
 static float getNormalSignFromFeatureBitSet(unsigned short arg);
-unsigned short volatile g_in_db09f0;
-float volatile g_out_db09f0;
+extern unsigned short volatile g_in_db09f0;
+extern float volatile g_out_db09f0;
 void drive_db09f0(void);
 extern int DAT_010d52d0;
 extern "C" unsigned int stub_val(void);

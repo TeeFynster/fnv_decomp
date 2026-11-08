@@ -129,7 +129,7 @@ NiAVObject* BipedAnim::AttachBipedModel(NiNode* model, NiNode* parent, BIPED_OBJ
                     if (!BIPED_OBJECT_TEXT(binding.boneArray[j]))
                     {
                         Warning(
-                            "MODELS: Bone %i for part '%s->%s' is unnamed.\r\nMake sure all the vertices are skinned to a named bone.",
+                            "MODELS: Bone %i for part '%s->%s' is unnamed.\r\nMake sure all the vertices are skinned to a named bone in Max.",
                             j, model->GetParent() ? BIPED_OBJECT_TEXT(model->GetParent()) : "NULL",
                             BIPED_OBJECT_TEXT(model));
                         continue;

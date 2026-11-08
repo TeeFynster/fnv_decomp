@@ -1,3 +1,5 @@
+extern "C" void* const DAT_010cb1e4[];
+
 #include "../../../../../include/hkArray.h"
 #include "../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../include/hkBaseObject.h"
@@ -1795,7 +1797,7 @@ extern void __cdecl FormHeapFreeAndLog_00401030(void* ptr);
 // @fnv 0x00cd1eb0
 int __thiscall FUN_00cd1eb0_StandIn::FUN_00cd1eb0(int aiFlags)
 {
-    unk00 = 0x010cb1e4;
+    unk00 = (int)DAT_010cb1e4;
     if (aiFlags & 1)
     {
         FormHeapFreeAndLog_00401030(this);

@@ -16338,7 +16338,7 @@ struct D_Array
     void FUN_008454f0(bool freeMem);
     void BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned int index, bool shift);
 };
-extern const float DAT_01012054 = -1.0f;
+__declspec(selectany) extern const float DAT_01012054 = -1.0f;
 struct E_Move
 {
     int u00, u04, kind, lane, slot, card, priority;
@@ -17859,8 +17859,8 @@ void CaravanGame::CaravanMenu_DoIdle()
                     }
                     else if (!IsFlagSet_00740f10(0x800))
                     {
-                        int stepX = (int)(E_Fn::FUN_00408840(mx) < 1.1 ? 0.0 : mx / E_Fn::FUN_00408840(mx));
-                        int stepY = (int)(E_Fn::FUN_00408840(my) < 1.1 ? 0.0 : my / E_Fn::FUN_00408840(my));
+                        int stepX = (int)(E_Fn::FUN_00408840(mx) < 0.01 ? 0.0 : mx / E_Fn::FUN_00408840(mx));
+                        int stepY = (int)(E_Fn::FUN_00408840(my) < 0.01 ? 0.0 : my / E_Fn::FUN_00408840(my));
                         if (IsFlagSet_00740f10(0x2000))
                         {
                             DeselectWholeTrack(curLane);

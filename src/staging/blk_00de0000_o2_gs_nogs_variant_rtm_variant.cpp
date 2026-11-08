@@ -3299,7 +3299,7 @@ struct FUN_00df9840_Class
 extern double DAT_010229b8;
 extern "C" unsigned int df9ae0_val(void);
 static float rand01(unsigned int state);
-volatile float df9ae0_sink;
+extern volatile float df9ae0_sink;
 void q_call_df9ae0(void);
 static int g_w1 = 1;
 static int g_ws = 3;

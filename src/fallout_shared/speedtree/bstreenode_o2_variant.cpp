@@ -30,7 +30,7 @@ inline void* AllocateHavokMemory(hkMemoryRouter* router, unsigned int size)
 struct GlobalObjectO2_00a7b610
 {
 };
-GlobalObjectO2_00a7b610 g_012681b4;
+extern GlobalObjectO2_00a7b610 g_012681b4;
 
 struct HC1Base
 {

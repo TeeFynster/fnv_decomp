@@ -4259,8 +4259,8 @@ void* __cdecl hkString_memCpy(void* pDst, const void* pSrc, int iNumBytes);
 void __cdecl hkArray_AppendTriangleIndicesWithOffset(int iType, const int* piIndices, int iNumIndices, int iOffset, hkArray<int>& kOut);
 extern "C" double DAT_010229b8;
 static float rand01_00e62ac0(unsigned seed);
-volatile unsigned g_e62ac0_seed = 12345u;
-volatile float g_e62ac0_sink;
+extern volatile unsigned g_e62ac0_seed;
+extern volatile float g_e62ac0_sink;
 void e62ac0_probe_caller(void);
 // SetVec3FromHelper - 36 bytes at 0x00e62af0 (/MT /O2 /GS /EHsc /Gy)
 // void body: out receives the same float three times, and out arrives in
@@ -4275,8 +4275,8 @@ void e62ac0_probe_caller(void);
 //   fstp [esp+4] / fld [esp+4]
 //   fst [edx] / fst [edx+4] / fstp [edx+8]
 //   ret
-int g_cn = 5;
-int g_c2 = 7;
+extern int g_cn;
+extern int g_c2;
 extern float __declspec(noinline) helper()
 {
     g_cn = (g_cn * 3) << (g_c2 & 31);
@@ -4285,12 +4285,12 @@ extern float __declspec(noinline) helper()
 static void SetVec3FromHelper(NiPoint3* out, float a, float b);
 void FUN_dummycaller();
 static void SwapFloatPair(float* base, int i, float* outB, float a, float b, unsigned __int64 outA);
-float* volatile g_e64_base;
-int volatile g_e64_i;
-float* volatile g_e64_outB;
-float volatile g_e64_a;
-float volatile g_e64_b;
-float* volatile g_e64_outA;
+extern float* volatile g_e64_base;
+extern int volatile g_e64_i;
+extern float* volatile g_e64_outB;
+extern float volatile g_e64_a;
+extern float volatile g_e64_b;
+extern float* volatile g_e64_outA;
 void dummy_call_e64fe0(void);
 struct E65020Entry
 {
@@ -7586,8 +7586,8 @@ struct Polytope
     Face faces[100];
 };
 extern float DAT_0104da48;
-extern const float DAT_0104da4c = 1.1920928955078125e-7f;
-extern const float DAT_01016248 = 0.5f;
+__declspec(selectany) extern const float DAT_0104da4c = 1.1920928955078125e-7f;
+__declspec(selectany) extern const float DAT_01016248 = 0.5f;
 
 static __forceinline __m128 splat(const float* p)
 {

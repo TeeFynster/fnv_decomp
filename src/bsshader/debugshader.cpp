@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define CreateShader CreateShader_fnv_00bd23f0
+
 // bsshader/debugshader.cpp: BloodSplatterBeamShader, SpeedTreeFrondShaderX, DebugShaderLoader, DebugShaderInit and more (15 functions)
 #include "NiRefObject_inline.h"
 

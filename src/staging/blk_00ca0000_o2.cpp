@@ -1,3 +1,7 @@
+extern "C" void* const DAT_010c477c[];
+extern int DAT_0102016c;
+extern int DAT_010c8914;
+
 #include "../../include/NiTLargeArray.h"
 #include "../../include/NiTArray.h"
 #include "../../include/hkArray.h"
@@ -2978,7 +2982,7 @@ struct TlsBlock_t
     int m_2b4;
 };
 
-__declspec(thread) TlsBlock_t g_tlsBlock;
+extern __declspec(thread) TlsBlock_t g_tlsBlock;
 
 struct TlsGuard_t
 {
@@ -7123,7 +7127,7 @@ extern "C" void __cdecl FUN_00c9eec0();
 // src: GUESS 0x00cbe880 (confidence: low)
 void __thiscall FUN_00cbe880_Class::UpdateFields_00cbe880()
 {
-    this->m_iWordAt00 = 0x10c477c;
+    this->m_iWordAt00 = (int)DAT_010c477c;
     FUN_00c9eec0();
 }
 
@@ -15346,13 +15350,13 @@ struct cb86f0_obj
     cb86f0_obj()
     {
         ((bhkRefObject*)this)->Initialize();
-        vtable = (void*)0x102016c;
+        vtable = (void*)&DAT_0102016c;
         const int inc = 1;
         unk0c = 0;
         DAT_01268154 += inc;
         vtable = (void*)&DAT_0102009c;
         DAT_01268118 += inc;
-        vtable = (void*)0x10c8914;
+        vtable = (void*)&DAT_010c8914;
     }
 
     static void* operator new(unsigned int size)

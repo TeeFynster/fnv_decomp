@@ -1,3 +1,8 @@
+struct Dummy_00afbbf0;
+int __cdecl ArchiveFile_ReadNoSwap(Dummy_00afbbf0*, int, int);
+void __cdecl CallVirtualMethodAtOffset48(void*, int, int);
+void __cdecl CompressedArchiveFile_ReadNoSwap(void*, int, int);
+
 #include "../../include/BSSimpleList.h"
 #define FNV64_NIPOINTER_INLINE_BODIES
 #include "../../include/NiPointer.h"
@@ -110,8 +115,8 @@ void ArchiveFile::SetEndianSwap(bool doSwap)
     }
     else
     {
-        (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x08)) = reinterpret_cast<void*>(0x00afbf80);
-        (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x0c)) = reinterpret_cast<void*>(0x00aff9f0);
+        (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x08)) = reinterpret_cast<void*>(&ArchiveFile_ReadNoSwap);
+        (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x0c)) = reinterpret_cast<void*>(&CallVirtualMethodAtOffset48);
     }
 }
 
@@ -125,8 +130,8 @@ void CompressedArchiveFile::SetEndianSwap(bool doSwap)
     }
     else
     {
-        (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x08)) = reinterpret_cast<void*>(0x00afc660);
-        (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x0c)) = reinterpret_cast<void*>(0x00aff9f0);
+        (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x08)) = reinterpret_cast<void*>(&CompressedArchiveFile_ReadNoSwap);
+        (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x0c)) = reinterpret_cast<void*>(&CallVirtualMethodAtOffset48);
     }
 }
 

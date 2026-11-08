@@ -695,7 +695,7 @@ FUN_00d33330_t& FUN_00d33330_t::CopyMemory_00d33330(const FUN_00d33330_t& other)
     return *this;
 }
 
-extern const float DAT_0104da48 = 3.402820018375656e+38F;
+__declspec(selectany) extern const float DAT_0104da48 = 3.402820018375656e+38F;
 struct CollisionRecord
 {
     __m128 position;

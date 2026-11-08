@@ -416,8 +416,8 @@ void __cdecl hkQsTransform_SetTransformArrayMulInverse(int iCount, const hkQsTra
 
 extern __m128 DAT_010ec7f0;
 extern __m128 DAT_010c71b0;
-extern const float DAT_01012054 = -1.0f;
-extern const float DAT_0104da4c = 1.192092896e-07f;
+__declspec(selectany) extern const float DAT_01012054 = -1.0f;
+__declspec(selectany) extern const float DAT_0104da4c = 1.192092896e-07f;
 
 static __m128 ld(const hkVector4& v)
 {

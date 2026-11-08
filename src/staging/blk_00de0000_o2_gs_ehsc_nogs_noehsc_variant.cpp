@@ -3019,7 +3019,7 @@ struct FUN_00df9840_Class {
 extern double DAT_010229b8;
 extern "C" unsigned int df9ae0_val(void);
 static float rand01(unsigned int state);
-volatile float df9ae0_sink;
+extern volatile float df9ae0_sink;
 void q_call_df9ae0(void);
 static int g_w1 = 1;
 static int g_ws = 3;
@@ -4412,7 +4412,7 @@ extern "C" __m128 _mm_div_ss(__m128, __m128);
 extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
 extern "C" void _mm_store_ss(float*, __m128);
 
-extern const float DAT_0104da4c = 1.1920928955078125e-07f;
+__declspec(selectany) extern const float DAT_0104da4c = 1.1920928955078125e-07f;
 extern __m128 DAT_010c7160;
 
 // @fnv 0x00de9410

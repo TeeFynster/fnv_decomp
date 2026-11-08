@@ -4251,7 +4251,7 @@ bool __cdecl Cmd_ToggleBorders_Execute(const ScriptParameter*, const char*, TESO
 }
 }  // namespace fnv_005b9370
 
-int g_TES;
+extern int g_TES;
 
 struct FUN_00456aa0_Class
 {
@@ -16731,7 +16731,7 @@ struct TlsBlock_t
     int unk264;
     unsigned char unk268;
 };
-__declspec(thread) TlsBlock_t g_tlsBlock;
+extern __declspec(thread) TlsBlock_t g_tlsBlock;
 
 extern unsigned int _tls_index;
 void* __fastcall TESObjectREFR_GetEnableStateParent(void* ecx);

@@ -445,7 +445,7 @@ FUN_0068ad20::FUN_0068ad20(int p1, float m_fParticleParameter5, SimpleDecalParam
     unk1C = 0;
     spNode20 = 0;
     DAT_0119c29c = cos((float)(pData->f58 * 0.01745329238474369));
-    DAT_0119c29c = BSMAX_0068b050(1.1, DAT_0119c29c);
+    DAT_0119c29c = BSMAX_0068b050(0.01, DAT_0119c29c);
     b125 = pData->b73;
     f128 = pData->f4C;
     b12C = pData->b76;

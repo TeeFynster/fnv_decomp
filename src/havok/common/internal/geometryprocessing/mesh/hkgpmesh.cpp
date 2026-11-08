@@ -7599,7 +7599,7 @@ extern "C" __m128 _mm_load_ps1(const float*);
 static __m128 _mm_set1_ps(const float& f) {__m128 a=_mm_load_ss(&f);return _mm_shuffle_ps(a,a,0);}
 #endif
 extern const float DAT_010141cc;
-extern const float DAT_0104da4c=1.1920928955078125e-7f;
+__declspec(selectany) extern const float DAT_0104da4c=1.1920928955078125e-7f;
 struct EVec {
     float x,y,z,w;
     const __m128& quad() const {return reinterpret_cast<const __m128&>(*this);}
@@ -9389,7 +9389,7 @@ struct HostE10 {
     unsigned char flag101;
     void AccumulateAndNormalizeVertexNormals();
 };
-extern const float DAT_010141cc = 0.0001f;
+__declspec(selectany) extern const float DAT_010141cc = 0.0001f;
 extern float DAT_01017718;
 extern float DAT_01016248;
 float __cdecl ClampedAcos(float);

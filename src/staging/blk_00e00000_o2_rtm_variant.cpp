@@ -3234,7 +3234,7 @@ struct S_e05_g
     int volatile val;
     bool volatile out;
 };
-S_e05_g g_e05 = {0, 0, 0, 0};
+extern S_e05_g g_e05;
 void e05_probe_caller(void);
 inline void swap16E05E(void* pv)
 {

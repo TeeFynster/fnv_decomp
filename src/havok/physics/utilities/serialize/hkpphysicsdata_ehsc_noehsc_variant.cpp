@@ -301,9 +301,9 @@ template <class T> __forceinline int findValue(T* self, Value* value)
 }
 typedef int Owner::*MemberPtr;
 static void tryMoveEntity(Owner* owner, Entity* volatile entityArg, MemberPtr valueArg);
-Owner* volatile probeOwner;
-Value* volatile probeValue;
-Entity* volatile probeEntity;
+extern Owner* volatile probeOwner;
+extern Value* volatile probeValue;
+extern Entity* volatile probeEntity;
 void probeCaller();
 
 struct SplitPlace

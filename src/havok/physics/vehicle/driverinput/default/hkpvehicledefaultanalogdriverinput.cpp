@@ -340,10 +340,10 @@ extern "C"
     LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
 }
 
-extern const float DAT_01011d78 = 0.0f;
-extern const float DAT_01016248 = 0.5f;
+__declspec(selectany) extern const float DAT_01011d78 = 0.0f;
+__declspec(selectany) extern const float DAT_01016248 = 0.5f;
 extern const float DAT_01017718 = 3.0f;
-extern const float DAT_0104da4c = 1.1920928955078125e-07f;
+__declspec(selectany) extern const float DAT_0104da4c = 1.1920928955078125e-07f;
 extern const float DAT_010ebf10 = 1.38888896f;
 extern const double DAT_0101ffa0 = 0.10000000149011612;
 

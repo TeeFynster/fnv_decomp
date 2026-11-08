@@ -1,3 +1,5 @@
+extern int DAT_0109750c;
+
 #include "../../include/NiTArray.h"
 // staging/blk_00a40000_o2.cpp: Owner, Controller, Arr, ExtraOwner and more (111 functions)
 
@@ -142,7 +144,7 @@ void* __cdecl NiBlendTransformInterpolator_CreateObject()
     if (p)
     {
         NiBlendInterpolator_NiBlendInterpolator(p);
-        *(void**)p = (void*)0x0109750c;
+        *(void**)p = (void*)&DAT_0109750c;
         return p;
     }
     return 0;

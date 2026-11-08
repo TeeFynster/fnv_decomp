@@ -1,3 +1,5 @@
+extern "C" void* DAT_0109babc;
+
 // NiNode.h and NiTexturingProperty.h currently declare incompatible NiTArray
 #include "../../../../include/BSFadeNode.h"
 #include "../../../../include/NiSourceCubeMap.h"
@@ -94,7 +96,7 @@ NiSourceCubeMap* __cdecl CreateNiSourceCubeMap()
     {
         NiSourceCubeMap* n = static_cast<NiSourceCubeMap*>(p);
         n->NiSourceTexture::NiSourceTexture();
-        *(unsigned int*)(n) = 0x0109babc;
+        *(unsigned int*)(n) = (int)&DAT_0109babc;
         n->m_uiFace = 0;
         return n;
     }

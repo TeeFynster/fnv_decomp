@@ -75,7 +75,7 @@ struct FUN_00e587c0_Class {
     float GetFloatAt(int idx, int base);
 };
 struct GlobalObjectO2_00d472a0 { int x; };
-GlobalObjectO2_00d472a0 g_0126e600;
+extern GlobalObjectO2_00d472a0 g_0126e600;
 void __stdcall FindResourceWithExpectedName(int, GlobalObjectO2_00d472a0*);
 void __stdcall Runtime_ForwardCall_00e5c5b0(int a);
 extern "C" void __stdcall FindResourceWithExpectedName(int, int);
@@ -2517,7 +2517,7 @@ struct BoundaryTable {
 };
 extern double _gModifierZero;
 extern float DAT_0104da4c;
-extern const float runtimeFloatSettingDefault1085 = 1.1f;
+__declspec(selectany) extern const float runtimeFloatSettingDefault1085 = 1.1f;
 inline void ApplyBound(float& out, float value) {
     out = value;
     if (out < -1.1f) out = -1.1f;
@@ -2700,8 +2700,8 @@ struct E5B130Object {
     void ProcessAndReturnValue_00d85ba0(int finishFlags);
 };
 static void _copyAtoms_00e5b130(E5B130Object* object, int finishFlags);
-E5B130Object* volatile g_finishObject;
-volatile int g_finishFlags;
+extern E5B130Object* volatile g_finishObject;
+extern volatile int g_finishFlags;
 void CallFinishObject();
 // hkMoppUsingFloatAabbVirtualMachine_queryPlanesOptimized (hkpMoppMachine.cpp)
 // with hkpMoppUsingFloatAabbVirtualMachine<...>::QueryAabbPrimitives and

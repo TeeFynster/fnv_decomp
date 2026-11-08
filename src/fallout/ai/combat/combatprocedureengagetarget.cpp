@@ -391,7 +391,7 @@ void Engage::PrintDebugInfo(Output* pOutput, int a, int b)
         if (actor)
         {
             WorldLocation location = actor->TESObjectREFR_GetWorldLocation<WorldLocation>();
-            pOutput->Print(a, b, text_7, location.Distance(&target), 200.0);
+            pOutput->Print(a, b, text_7, location.Distance(&target), 256.0);
         }
         break;
     case 4:
@@ -400,7 +400,7 @@ void Engage::PrintDebugInfo(Output* pOutput, int a, int b)
         if (actor)
         {
             WorldLocation location = actor->TESObjectREFR_GetWorldLocation<WorldLocation>();
-            pOutput->Print(a, b, text_10, location.Distance(&target), 200.0);
+            pOutput->Print(a, b, text_10, location.Distance(&target), 256.0);
         }
         break;
     case 5:

@@ -88,7 +88,7 @@ bool ObstacleTaskData::AddOperation(const NiPointer<ObstacleData>& obstacle, OBS
 void ObstacleTaskData::Process()
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_NAVMESH, true,
-                           "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Pathfinding\\NavMeshObstacleTask.c",
+                           "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Pathfinding\\NavMeshObstacleTask.cpp",
                            357);
     NavMeshObstacleManager::GetSingleton()->GetCharPtrAtOffset()->Lock();
     if (pInfo->ResolveNavMesh(m_spSourceNavMesh))

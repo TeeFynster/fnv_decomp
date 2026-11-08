@@ -11,8 +11,8 @@ extern "C" __m128 _mm_setr_ps(float, float, float, float);
 extern "C" void _mm_store_ps(float*, __m128);
 extern char DAT_0102f0ec[];
 extern float DAT_01018180, DAT_01013d84;
-extern const float DAT_0104da48 = 3.402820018375656e38f;
-extern const float DAT_010141cc = 0.0001f;
+__declspec(selectany) extern const float DAT_0104da48 = 3.402820018375656e38f;
+__declspec(selectany) extern const float DAT_010141cc = 0.0001f;
 extern const float DAT_01017718, DAT_0101e570, DAT_01017868, DAT_0102d934, DAT_010209a0, DAT_01013ea4, DAT_010c636c,
     DAT_010c6368, DAT_0102226c;
 

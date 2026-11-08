@@ -430,7 +430,7 @@ struct FUN_00516cd0_class
 {
     bool __thiscall CanUseLockedRef(TESObjectREFR* ref, Actor* actor, bool useLockpick);
 };
-int DAT_011c6200;
+extern int DAT_011c6200;
 int FixedStrings_GetArrowQuiver();
 struct FUN_00505b80_cls
 {

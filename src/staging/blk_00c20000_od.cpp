@@ -1,3 +1,5 @@
+extern "C" unsigned char DAT_011f6370[];
+
 
 // src/staging/blk_00c20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
@@ -385,8 +387,8 @@ void __cdecl MessageHandler_SetCrashTraceFileName(const char* pcSuffix)
 }  // namespace fnv_00c3bc80
 
 extern const void* DAT_010c14a8;
-MessageHandler* MessageHandler::pHandler;
-// Calls FUN_00aa4c60, sets the vtable to DAT_010c14a8, stores b in bStatic, sets MessageHandler::pHandler to this and returns this.
+
+// Calls BSCoreMessage_BSCoreMessage, sets the vtable to DAT_010c14a8, stores b in bStatic, sets MessageHandler::pHandler to this and returns this.
 // @fnv 0x00c3bcf0
 // src: EXE 0x00c3bcf0
 MessageHandler* __thiscall MessageHandler::MessageHandler_00c3bcf0(bool abStatic)
@@ -417,7 +419,7 @@ extern "C" unsigned char DAT_011af49c;
 void __cdecl Object_ProcessEntries_00c3c0c0()
 {
     for (int i = 0; i < 0x18; ++i)
-        ((unsigned char*)0x11f6370)[i] = 0;
+        ((unsigned char*)DAT_011f6370)[i] = 0;
     DAT_011af49c = 0;
 }
 

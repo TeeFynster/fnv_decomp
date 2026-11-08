@@ -12,7 +12,7 @@ struct NiPoint3StartupTable
 };
 
 // @fnv 0x00a62110
-NiPoint3StartupTable gNiPoint3StartupSrc = {{8193, 1, 0, -1, 0, 0, 264, 1, 0, 264, 2, 0, 264, 3, 0, 264, 3}};
+NiPoint3StartupTable gNiPoint3StartupSrc = {{8193, 1, 0, -1, 0, 0, 0, 264, 1, 0, 264, 2, 0, 264, 3, 0, 264}};
 NiPoint3StartupTable gNiPoint3StartupDst = gNiPoint3StartupSrc;
 
 extern void* DAT_011f4aa8;

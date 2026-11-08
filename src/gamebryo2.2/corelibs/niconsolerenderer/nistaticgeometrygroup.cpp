@@ -560,8 +560,7 @@ struct P03MM
 {
     void* Allocate(unsigned int);
 };
-extern int DAT_01400000;
-// Allocates and initializes a NiGeometryBufferData buffer when pkScreenTexture->m_pkGeometryRendererData is null, then calls FUN_00e98730.
+// Allocates and initializes a NiGeometryBufferData buffer when pkScreenTexture->m_pkGeometryRendererData is null, then calls NiGeometryGroup_AddObject.
 // @fnv 0x00e94a30
 void __fastcall InitStaticScreenTexture(NiStaticGeometryGroup* group, void*, NiScreenTexture* pkScreenTexture)
 {
@@ -574,7 +573,7 @@ void __fastcall InitStaticScreenTexture(NiStaticGeometryGroup* group, void*, NiS
         else
             pkBuffData = 0;
         pkBuffData->m_eRequestType = 4;
-        pkBuffData->m_uiValue1 = (unsigned int)&DAT_01400000;
+        pkBuffData->m_uiValue1 = 0x01400000u;
         reinterpret_cast<RegisterStaticGeometryBufferFn>(&RegisterStaticGeometryBuffer)(group, pkBuffData);
     }
 }

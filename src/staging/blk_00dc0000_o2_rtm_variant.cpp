@@ -1082,11 +1082,11 @@ struct OW
     {}
 };
 static int hkpProcessFlyingColors(const LocalM128* self, OW other, const LocalM128* a);
-volatile int g_s, g_a, g_o, g_r;
+extern volatile int g_s, g_a, g_o, g_r;
 void mask_test_caller();
 static void CopyFloatsFromBytes(float* dst, const unsigned char* src);
-unsigned char volatile g_src[4];
-float volatile g_dst[4];
+extern unsigned char volatile g_src[4];
+extern float volatile g_dst[4];
 void caller();
 struct BEStoreTarget
 {
@@ -1417,13 +1417,13 @@ static void FactorTridiagonal(int numConstraints, float cfm, S00dd0ff0_Jacobian*
                               S00dd0ff0_AccumulatorOffset* accumsOffsets,
                               const S00dd0ff0_VelocityAccumulator* accumsBase, S00dd0ff0_Triple* triple,
                               int bufferSize);
-volatile int g_S00dd0ff0_n;
-volatile float g_S00dd0ff0_cfm;
-volatile int g_S00dd0ff0_jac;
-volatile int g_S00dd0ff0_offs;
-volatile int g_S00dd0ff0_base;
-volatile int g_S00dd0ff0_triple;
-volatile int g_S00dd0ff0_size;
+extern volatile int g_S00dd0ff0_n;
+extern volatile float g_S00dd0ff0_cfm;
+extern volatile int g_S00dd0ff0_jac;
+extern volatile int g_S00dd0ff0_offs;
+extern volatile int g_S00dd0ff0_base;
+extern volatile int g_S00dd0ff0_triple;
+extern volatile int g_S00dd0ff0_size;
 void S00dd0ff0_Caller();
 struct S_00dd1180_Hdr
 {

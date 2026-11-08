@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define UpdateShaderConstants UpdateShaderConstants_fnv_00bc4ed0
+
 #define FNV64_NIPOINTER_INLINE_BODIES
 // bsshader/beamshader.cpp: BeamPassShader, BloodSplatterBeamShader, DistantLODShader (6 functions)
 #include "NiRefObject_inline.h"

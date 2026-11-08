@@ -913,7 +913,7 @@ struct S_00c6aca0_Tls
     int unk2b0;
     int ctx;
 };
-__declspec(thread) S_00c6aca0_Tls DAT_tls;
+extern __declspec(thread) S_00c6aca0_Tls DAT_tls;
 struct S_00c6aca0_Ctx
 {
     int saved;
@@ -2241,11 +2241,11 @@ struct List_cb3d10
     int m_iElementCount;
 };
 static hkpSimulationIsland* FindItemForThreshold(Owner_cb3d10* owner, List_cb3d10* list, int threshold, hkpSimulationIsland* target);
-volatile int g_cb3d10_thr;
+extern volatile int g_cb3d10_thr;
 Owner_cb3d10* volatile g_cb3d10_owner;
-List_cb3d10* volatile g_cb3d10_list;
-hkpSimulationIsland* volatile g_cb3d10_target;
-hkpSimulationIsland* volatile g_cb3d10_out;
+extern List_cb3d10* volatile g_cb3d10_list;
+extern hkpSimulationIsland* volatile g_cb3d10_target;
+extern hkpSimulationIsland* volatile g_cb3d10_out;
 void CallTarget_cb3d10();
 struct B10293_Item
 {
@@ -2743,7 +2743,7 @@ __forceinline int RemapOne(Cb4890_LocalBuffer<int>& used, int* mapped, Cb4890_Ch
 }
 static void RemapElements(const Cb4890_ElemArray& list, Cb4890_RemapTable* remap, Cb4890_Owner* owner,
                           Cb4890_IntArray* src, Cb4890_CharArray* out);
-volatile int g_cb4890[5];
+extern volatile int g_cb4890[5];
 void Cb4890_caller();
 struct S00cb5100_WBits
 {

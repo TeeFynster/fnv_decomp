@@ -307,7 +307,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                             offset.y *= -1.0;
                         location.x += offset.x;
                         location.y += offset.y;
-                        location.z += 200.0;
+                        location.z += 256.0;
                         kPlaybackHandle.SetPriority(static_cast<unsigned char>(255));
                         kPlaybackHandle.SetPosition(location.x, location.y, location.z);
                         kPlaybackHandle.Play(false);

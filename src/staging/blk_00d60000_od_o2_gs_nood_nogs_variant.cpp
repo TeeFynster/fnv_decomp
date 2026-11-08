@@ -132,7 +132,7 @@ int g_a1;
 Box g_base;
 Box g_p10;
 int g_a2;
-int g_sink;
+extern int g_sink;
 
 void zz_call()
 {

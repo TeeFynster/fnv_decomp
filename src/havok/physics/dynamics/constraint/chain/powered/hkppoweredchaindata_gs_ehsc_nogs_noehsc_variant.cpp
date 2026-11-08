@@ -152,7 +152,7 @@ static __declspec(noinline) void Object_UpdateFields_00e3b680(const Vec4& b, con
         reinterpret_cast<__m128&>(r) = _mm_xor_ps(reinterpret_cast<__m128&>(r), *(const __m128*)DAT_010c44d0);
 }
 
-volatile int g_a, g_b, g_r;
+extern volatile int g_a, g_b, g_r;
 void caller_e3b680()
 {
     Object_UpdateFields_00e3b680(*(Vec4*)g_b, *(Vec4*)g_a, *(Vec4*)g_r);

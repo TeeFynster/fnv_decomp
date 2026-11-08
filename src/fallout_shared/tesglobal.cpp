@@ -1,5 +1,8 @@
 // fallout_shared/tesglobal.cpp: TESGlobal, TESImageSpace (8 functions)
 
+// Keep the deleting wrapper at 0x005a63c0 distinct from the real
+// TESImageSpace wrapper at 0x0052b380; their destructor targets differ.
+#define TESImageSpace TESImageSpace_005a63c0
 #include "../../include/BSStringT.h"
 #include "tesglobal_layout.h"
 #include "../../include/TESFile.h"

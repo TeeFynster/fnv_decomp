@@ -59,7 +59,7 @@ void BGSTouchSpellForm::InitItem(TESForm* owner)
         if (formID && owner && !formID->FUN_004094f0(owner))
         {
             Warning(
-                "MASTERFILE: Enchanting (%08X) '%s' has invalid effect trigger type or effect for object (%08X) '%s'",
+                "MASTERFILE: Enchanting (%08X) '%s' has invalid effect trigger type or effect for object (%08X) '%s'.",
                 m_pMagicItem->GetFormID(), ((TESObjectWithEditorID*)m_pMagicItem)->GetEditorID(), owner->GetFormID(),
                 ((TESObjectWithEditorID*)owner)->GetEditorID());
             m_pMagicItem = 0;

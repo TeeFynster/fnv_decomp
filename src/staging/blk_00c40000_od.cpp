@@ -1,3 +1,6 @@
+// Matched operands prove the original import slot named below.
+#define FreeLibrary fnv_Import_SuspendThread_00fdf15c
+
 
 // src/staging/blk_00c40000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.

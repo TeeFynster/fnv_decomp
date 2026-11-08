@@ -1,5 +1,11 @@
 // fallout/ai/escortpackage.cpp: EscortActorPackageData (10 functions)
 
+// This TU also matches the deleting wrapper at 0x009f0980. Its
+// destructor target is EscortActorPackageData at 0x009f09b0, whereas
+// the real UseWeapon deleting wrapper at 0x0067d990 calls 0x0067d9c0.
+// Keep their compiler COMDAT identities distinct; matching code bytes
+// alone does not make their relocation targets interchangeable.
+#define UseWeaponActorPackageData UseWeaponActorPackageData_009f0980
 #include "../../../include/EscortActorPackageData.h"
 #include "../../../include/UseWeaponActorPackageData.h"
 #include "../../../include/Actor.h"

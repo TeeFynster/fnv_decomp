@@ -925,7 +925,7 @@ BGSPerkEntry* BGSEntryPointPerkEntry::Duplicate()
     return pduplicate;
 }
 
-unsigned int _data_011c16bc;
+extern unsigned int _data_011c16bc;
 
 // @fnv 0x005eabb0
 BGSPerk::~BGSPerk()

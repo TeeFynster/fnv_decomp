@@ -25,7 +25,7 @@
 struct GlobalObjectO2_00a7b610
 {
 };
-GlobalObjectO2_00a7b610 g_012681b4;
+extern GlobalObjectO2_00a7b610 g_012681b4;
 
 #include <xmmintrin.h>
 extern __declspec(thread) unsigned int t_uiMemContextC8C;

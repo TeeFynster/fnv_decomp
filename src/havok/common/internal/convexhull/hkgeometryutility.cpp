@@ -755,7 +755,7 @@ class ObbAxis
     }
     static const float kHalf, kThree, kZero;
 };
-const float ObbAxis::kHalf = 0.5f, ObbAxis::kThree = 3.0f, ObbAxis::kZero = 0.0f;
+__declspec(selectany) const float ObbAxis::kHalf = 0.5f, ObbAxis::kThree = 3.0f, ObbAxis::kZero = 0.0f;
 struct ObbWord
 {
     int v;
@@ -938,7 +938,7 @@ extern "C" LocalM128 _mm_load_ss(const float*);
 extern "C" LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
 extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
 extern "C" LocalM128 _mm_set_ss(float);
-extern const float DAT_010d1018 = 0.0000011920928955078125f;
+__declspec(selectany) extern const float DAT_010d1018 = 0.0000011920928955078125f;
 
 struct S4
 {

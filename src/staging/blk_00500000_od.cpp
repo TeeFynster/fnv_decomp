@@ -1,3 +1,6 @@
+extern "C" void* const DAT_0102814c[];
+extern "C" void* const DAT_01028128[];
+
 
 // src/staging/blk_00500000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
@@ -798,8 +801,8 @@ struct FUN_00509a10 : TESGrassBase
 // @fnv 0x00509a10
 FUN_00509a10::FUN_00509a10()
 {
-    ((void**)this)[0] = (void*)0x0102814c;
-    ((void**)((char*)this + 0x30))[0] = (void*)0x01028128;
+    ((void**)this)[0] = (void*)DAT_0102814c;
+    ((void**)((char*)this + 0x30))[0] = (void*)DAT_01028128;
     SetFormType(0x24);
     ResetFormData();
 }

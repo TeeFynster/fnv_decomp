@@ -1316,8 +1316,8 @@ Obj8* ep=&current;
 };
 #include <xmmintrin.h>
 static unsigned int* Object_ProcessEntries_00d11000(unsigned int* dst, int n);
-unsigned int* volatile g_zeroDestination;
-volatile int g_zeroLength;
+extern unsigned int* volatile g_zeroDestination;
+extern volatile int g_zeroLength;
 unsigned int* CallZeroBlocks();
 #include <xmmintrin.h>
 #include <xmmintrin.h>

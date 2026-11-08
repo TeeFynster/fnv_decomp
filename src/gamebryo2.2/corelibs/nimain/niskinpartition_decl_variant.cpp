@@ -4,10 +4,10 @@
 // that unit declares it this way.
 
 #include "../../../../include/NiAccumulator.h"
-#include "../../../../include/NiSkinPartition.h"
+#include "../../../../include/NiSkinPartitionGlobals.h"
 #include "../../../../include/NiRenderer.h"
 #include "../../../../include/Pair.h"
-const void* g_011f5b1c;
+
 const void* __cdecl NiSkinPartition_GetRTTI();
 void __stdcall FUN_00a82600(int a, int b, float c);
 struct Holder

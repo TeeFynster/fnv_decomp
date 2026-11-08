@@ -1,3 +1,6 @@
+// This overload is the distinct original entry point at 0x00ad84b0.
+#define ForwardToManager ForwardToManager_fnv_00ad84b0
+
 #include "../../include/AudioLoadTask.h"
 #include "../../include/BSAudio.h"
 #include "../../include/BSAudioManager.h"

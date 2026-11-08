@@ -1697,7 +1697,7 @@ struct TlsBlock_t
     int unk2B0;
     int m_2b4;
 };
-__declspec(thread) TlsBlock_t g_tlsBlock;
+extern __declspec(thread) TlsBlock_t g_tlsBlock;
 struct TlsGuard_t
 {
     int m_saved;
@@ -2729,7 +2729,7 @@ static __declspec(noinline) char CB1030ToLower(char c)
     return c;
 }
 // Exported elsewhere through a function pointer, which keeps the helper's cdecl stack arguments.
-char(__cdecl* g_pfnCB1030ToLower)(char) = CB1030ToLower;
+extern char(__cdecl* g_pfnCB1030ToLower)(char);
 int __cdecl CompareCaseInsensitive(const char* pcA, const char* pcB, int n);
 // FUN_00cb75d0 : default constructor of the object whose first member holds
 // the class table pointer.  The constructor clears three trailing dword

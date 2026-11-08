@@ -361,7 +361,7 @@ bool __cdecl FUN_0082eca0(BGSImpactData* pkImpact, NiPoint3 kPos, float fScale);
 extern float g_fFootstepRand_0101e2bc;
 
 static const char s_szBabyLand[] = "FSTBabyLand";
-extern const char g_szFootstepEnd[] = "";
+__declspec(selectany) extern const char g_szFootstepEnd[] = "";
 
 // Resolves the footstep material and impact data for an actor, adjusts the position, and plays the corresponding first- or third-person footstep sound.
 // @fnv 0x008391b0

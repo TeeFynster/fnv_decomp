@@ -1,3 +1,5 @@
+extern unsigned int DAT_011f42a0;
+
 #include "../../../../include/NiTStringPointerMap.h"
 // gamebryo2.2/corelibs/nimain/nigeometry.cpp: NiGeometry, NiAVObject and dependencies (23 functions)
 
@@ -254,7 +256,7 @@ void NiGeometry::ReplaceModelData(NiGeometryData* data)
 void NiGeometry::UpdatePropertiesDownwardPass(NiPropertyState* state)
 {
     NiAVObject::UpdatePropertiesDownwardPass(state);
-    ((RecursiveSpinLock*)0x011f42a0)->Lock(0);
+    ((RecursiveSpinLock*)&DAT_011f42a0)->Lock(0);
     NiPropertyState* propertyState = (NiPropertyState*)((char*)this + 0x9c);
     *propertyState = *state;
     NiPropertyNode* node = *(NiPropertyNode**)((char*)this + 0x24);
@@ -367,7 +369,7 @@ void NiGeometry::ProcessClone(CloningProcess& process)
         {
             geometryClone->m_spShader = m_spShader;
             m_spShader->SetupGeometry(geometryClone);
-            ((RecursiveSpinLock*)0x011f42a0)->Lock((const char*)shader);
+            ((RecursiveSpinLock*)&DAT_011f42a0)->Lock((const char*)shader);
             geometryClone->UpdatePropertiesDownwardPass((NiPropertyState*)((char*)this + 0x9c));
             if (--DAT_011f42a4 == 0)
                 DAT_011f42a0 = (unsigned int)shader;

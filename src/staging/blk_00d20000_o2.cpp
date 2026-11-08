@@ -1,3 +1,5 @@
+extern "C" void* const DAT_010ce504[];
+
 #define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
 #define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
@@ -2549,7 +2551,7 @@ FUN_00d2acf0::FUN_00d2acf0(void* a1, __m128* a2, __m128* a3, float a4, float a5,
 {
     unk50 = a4;
     unk54 = a5;
-    vtbl = (void**)0x10ce504;
+    vtbl = (void**)DAT_010ce504;
     unk5c = 0;
     unk20 = *a2;
     unk30 = *a3;

@@ -4991,7 +4991,7 @@ struct TokStack_c48ca0
     void ShiftElements(int iDelta, bool bClear);
     void ProcessEntries_00c48ca0();
 };
-TokStack_c48ca0 g_ts;
+extern TokStack_c48ca0 g_ts;
 void __cdecl use_all();
 struct C4F320Child
 {
@@ -6484,7 +6484,7 @@ struct MapThreadData
     int unk2b0;
     int heapContext;
 };
-__declspec(thread) MapThreadData mapTls;
+extern __declspec(thread) MapThreadData mapTls;
 inline int GetHeapContext()
 {
     int value = mapTls.heapContext;
@@ -7136,7 +7136,7 @@ struct AllocationTLS
     int unk2b0;
     int context;
 };
-__declspec(thread) AllocationTLS g_allocationTLS;
+extern __declspec(thread) AllocationTLS g_allocationTLS;
 struct S_00c42960_Scope
 {
     int m_old;

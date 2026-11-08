@@ -1628,10 +1628,10 @@ struct FUN_00e3f370_cls
 // which the original does not have.
 __int64 __cdecl __time64(__int64* t);
 static __int64 Object___time64_Thunk(__int64* t);
-__int64* volatile g_ptr;
+extern __int64* volatile g_ptr;
 __int64 probe_caller(void);
 typedef __int64 (*probe_fn)(void);
-probe_fn volatile g_keep = probe_caller;
+extern probe_fn volatile g_keep;
 int main(void)
 {
     g_ptr = 0;
@@ -1640,7 +1640,7 @@ int main(void)
 }
 void __cdecl nullsub_333();
 extern "C" unsigned int be_arg_src_e2f9(void);
-volatile unsigned int g_be_sink_e2f9;
+extern volatile unsigned int g_be_sink_e2f9;
 static unsigned int SwapByteOrder(unsigned int x);
 void call_byteswap_e2f9(void);
 unsigned char __cdecl ScaleToByte(float fMin, float fScaledValue, float fValue);

@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define CalculateNormals CalculateNormals_fnv_004a1ff0
+
 // fallout_shared/bgsdecalmanager.cpp: BGSDecalManager and decal helpers (61 functions)
 
 // Use the checked layouts in place of the generated legacy base layouts.

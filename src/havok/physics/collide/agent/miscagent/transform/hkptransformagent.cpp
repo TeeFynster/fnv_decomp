@@ -1,3 +1,5 @@
+extern "C" void* const DAT_010ce81c[];
+
 #define FNV64_HKVECTOR4_OWN_ASSIGN
 #define FNV64_HKVECTOR4_OWN_DEFAULT
 #define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
@@ -1624,7 +1626,7 @@ struct TtShapeCollection : TtTransform {
 void TtShapeCollection::UpdateFields_00d43460(int a, int b, int c, int d) {
     SectorDesc s;
     s.unk04 = false;
-    s.sectorPtrs = (void*)0x10ce81c;
+    s.sectorPtrs = (void*)DAT_010ce81c;
     s.unk08 = d;
     TtTransform::hkpTransformAgent_getPenetrations(b, a, c, &s);
 }

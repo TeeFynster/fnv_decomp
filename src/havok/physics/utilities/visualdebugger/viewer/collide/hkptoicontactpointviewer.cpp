@@ -458,7 +458,7 @@ extern float DAT_01017718;
 extern float DAT_01016248;
 extern float DAT_01019de0;
 extern float DAT_010c69c4;
-extern const float DAT_010c69c0=(0.85f-1.0f);
+__declspec(selectany) extern const float DAT_010c69c0=(0.85f-1.0f);
 extern float DAT_010ec7f0;
 extern unsigned long DAT_0126835c;
 

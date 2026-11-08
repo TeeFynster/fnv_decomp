@@ -194,7 +194,7 @@ void ValueModifierEffect::ApplyActorValueModifier(Actor* actor, float magnitude,
     if (value == ActorValue::ActorValue__Index_VALUE_NONE)
     {
         if (magnitude != 0.0)
-            Warning("ValueModifierEffect tried to modify an actor value without specifying which actor value to");
+            Warning("ValueModifierEffect tried to modify an actor value without specifying which actor value to modify\n");
         return;
     }
     bool ability = m_eSpellType == 4 && !HasConditions();

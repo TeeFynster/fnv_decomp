@@ -1,3 +1,5 @@
+extern int DAT_0109ec0c;
+
 #include "../../../../include/NiTArray.h"
 
 // src/gamebryo2.2/corelibs/nimain/nifloatsextradata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nifloatsextradata.cpp).
@@ -25,7 +27,7 @@ void* __cdecl NiFloatsExtraData_CreateObject()
     {
         NiExtraData* pExtraData = static_cast<NiExtraData*>(p);
         pExtraData->FUN_00a7b2e0();
-        *static_cast<void**>(p) = (void*)0x0109ec0c;
+        *static_cast<void**>(p) = (void*)&DAT_0109ec0c;
         *(int*)(static_cast<char*>(p) + 0x10) = 0;
         *(int*)(static_cast<char*>(p) + 0x0c) = 0;
         return p;

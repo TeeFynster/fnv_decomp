@@ -187,7 +187,7 @@ static __forceinline bool gt_00dd6c10(const float& a, const float& b)
     return a > b;
 }
 extern float DAT_0104e148;
-extern const float DAT_010c8440 = -1.1920929e-07f;
+__declspec(selectany) extern const float DAT_010c8440 = -1.1920929e-07f;
 extern "C" LocalM128 _mm_load_ss(const float*);
 extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
 extern "C" LocalM128 _mm_xor_ps(LocalM128, LocalM128);

@@ -318,7 +318,7 @@ struct Program {
     void* m_auiShapeKeys[5];
     NiTStringPointerMap<NiD3DPixelShader*>* m_map;
 };
-Program* DAT_0126fa10;
+extern Program* DAT_0126fa10;
 void __cdecl RemoveProgramFromMap(Program* program);
 struct FUN_00e94070_Class {
     void* m_obj;

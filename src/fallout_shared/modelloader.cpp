@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define Save Save_fnv_00c3a950
+
 // fallout_shared/modelloader.cpp: DelStandIn, QueuedTreeModel, ModelLoader, QueuedHelmet and more (493 functions)
 
 #include "../../include/BSFileEntry.h"
@@ -972,7 +976,7 @@ struct TLSData
     bool bLoadTexturesDegraded;
 };
 
-__declspec(thread) TLSData g_tlsData;
+extern __declspec(thread) TLSData g_tlsData;
 
 // Returns the thread-local flag that indicates whether textures are being loaded in degraded mode.
 // @fnv 0x0043c130

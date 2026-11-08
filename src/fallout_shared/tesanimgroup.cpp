@@ -464,7 +464,7 @@ bool TESAnimGroup_IsAttackSpinAction(unsigned short ausType)
 {
     if (ausType == 0xff)
         return false;
-    return IsNine(*(int*)(GetType(ausType) * 0x24 + 0x11977e4));
+    return IsNine(*(int*)(GetType(ausType) * 0x24 + (int)DAT_011977e4));
 }
 
 void* __cdecl _Deallocate(void*);

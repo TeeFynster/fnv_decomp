@@ -2266,7 +2266,7 @@ void __cdecl sortPairList(PairList<TypedPair>& list)
 
 extern int DAT_01269200;
 
-extern const float DAT_0104da48 = 3.402820018375656e+38f;
+__declspec(selectany) extern const float DAT_0104da48 = 3.402820018375656e+38f;
 
 struct ProfileNamedRecord : TraceRecord
 {

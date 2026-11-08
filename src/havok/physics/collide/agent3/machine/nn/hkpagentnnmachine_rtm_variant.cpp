@@ -462,7 +462,7 @@ struct TrackMonitor
 };
 extern unsigned int DAT_0126835c;
 extern unsigned int DAT_01269200;
-extern const float DAT_0104e148 = -3.40282e+38f;
+__declspec(selectany) extern const float DAT_0104e148 = -3.40282e+38f;
 extern const char DAT_010cc9d0[];
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned int);
 struct PreviousBodies

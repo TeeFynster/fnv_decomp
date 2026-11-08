@@ -253,7 +253,7 @@ struct FUN_00e936f0_Class {
 };
 void __cdecl _NiFree(void* p);
 struct Program;
-Program* DAT_0126fa10;
+extern Program* DAT_0126fa10;
 void __cdecl RemoveProgramFromMap(Program* program);
 struct FUN_00e94070_Class {
     void* m_obj;

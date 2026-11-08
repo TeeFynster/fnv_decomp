@@ -1,3 +1,5 @@
+extern int DAT_010a2304;
+
 // gamebryo2.2/corelibs/nimain/nibacktofrontaccumulator.cpp: NiBackToFrontAccumulator (12 functions)
 
 #include "../../../../include/BSFaceGenMorphData.h"
@@ -51,7 +53,7 @@ NiAccumulator* __fastcall InitializeAccumulator(NiAccumulator* self, void*) thro
 {
     __assume(self != 0);
     ::new (self) NiObject;
-    *(volatile unsigned int*)self = 0x010a2304;
+    *(volatile unsigned int*)self = (int)&DAT_010a2304;
     self->m_pkCamera = 0;
     return self;
 }

@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define DestroyIfFlagged DestroyIfFlagged_fnv_00a47cc0
+
 // gamebryo2.2/corelibs/nianimation/nisequence.cpp: AHSeqOwner (5 functions)
 
 #include <windows.h>

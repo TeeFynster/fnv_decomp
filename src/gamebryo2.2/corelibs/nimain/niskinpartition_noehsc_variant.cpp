@@ -4,11 +4,11 @@
 // to their real unit once identified.
 
 #include "../../../../include/NiAccumulator.h"
-#include "../../../../include/NiSkinPartition.h"
+#include "../../../../include/NiSkinPartitionGlobals.h"
 #include "../../../../include/NiBinaryStream.h"
 #include "../../../../include/NiStream.h"
 #include "../../../../include/NiRenderer.h"
-const void* g_011f5b1c;
+
 const void* __cdecl NiSkinPartition_GetRTTI();
 void __stdcall FUN_00a82600(int a, int b, float c);
 struct Holder

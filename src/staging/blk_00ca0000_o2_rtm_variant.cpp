@@ -1,3 +1,6 @@
+extern int DAT_0102016c;
+extern int DAT_010c8914;
+
 #include "../../include/BSSimpleArray.h"
 #include "../../include/NiTArray.h"
 // staging/blk_00ca0000_o2_rtm_variant.cpp: QuaternionLocal_00cb2ca0, AryType, RayCaster_rc1c, VelocityController and more (19 functions)
@@ -1686,7 +1689,7 @@ struct TlsBlock_t
     int unk2B0;
     int m_2b4;
 };
-__declspec(thread) TlsBlock_t g_tlsBlock;
+extern __declspec(thread) TlsBlock_t g_tlsBlock;
 struct TlsGuard_t
 {
     int m_saved;
@@ -2723,7 +2726,7 @@ static __declspec(noinline) char CB1030ToLower(char c)
     return c;
 }
 // Exported elsewhere through a function pointer, which keeps the helper's cdecl stack arguments.
-char(__cdecl* g_pfnCB1030ToLower)(char) = CB1030ToLower;
+extern char(__cdecl* g_pfnCB1030ToLower)(char);
 int __cdecl CompareCaseInsensitive(const char* pcA, const char* pcB, int n);
 // FUN_00cb75d0 : default constructor of the object whose first member holds
 // the class table pointer.  The constructor clears three trailing dword
@@ -6620,7 +6623,7 @@ struct CAC410_TLSState
     char m_ucUnknownByte[0x2B4];
     int m_uiFilterValue;
 };
-__declspec(thread) CAC410_TLSState g_CAC410_TLSState;
+extern __declspec(thread) CAC410_TLSState g_CAC410_TLSState;
 struct CAC410_RefCounted
 {
     virtual void Dummy();
@@ -8097,13 +8100,13 @@ struct cb86f0_obj : bhkRefObject
     cb86f0_obj()
     {
         Initialize();
-        vtable = (void*)0x102016c;
+        vtable = (void*)&DAT_0102016c;
         const int inc = 1;
         unk0c = 0;
         DAT_01268154 += inc;
         vtable = (void*)&DAT_0102009c;
         DAT_01268118 += inc;
-        vtable = (void*)0x10c8914;
+        vtable = (void*)&DAT_010c8914;
     }
 
     static void* operator new(unsigned int size)

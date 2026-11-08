@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define GetEntryPoint GetEntryPoint_fnv_00639b40
+
 
 // Compile form of the FNV 2.2 vertex-buffer-manager translation unit for the
 // MSVC 2008 (Windows, x86) matcher. This unit defines

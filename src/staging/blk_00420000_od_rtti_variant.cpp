@@ -1736,7 +1736,7 @@ BSMultiBound* __cdecl MultiBoundMarkerData_CreateMultiBoundForRef(TESObjectREFR*
 int __cdecl NiZBufferProperty_GetType();
 extern "C" long __stdcall InterlockedCompareExchange(long volatile* Destination, long Exchange, long Comparand);
 typedef long(__stdcall* InterlockedCompareExchange_t)(long volatile*, long, long);
-InterlockedCompareExchange_t DAT_00fdf1bc = InterlockedCompareExchange;
+extern InterlockedCompareExchange_t DAT_00fdf1bc;
 void __cdecl BSAtomicCompareExchange(void* pDest, void* pSrc, unsigned int n);
 struct ObjB4037
 {

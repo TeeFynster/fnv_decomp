@@ -1,3 +1,9 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define ScaleTo ScaleTo_fnv_00ac1120
+
+extern "C" char DAT_01140ef8[];
+
 
 // src/staging/blk_00ac0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
@@ -3422,7 +3428,7 @@ void* __cdecl Runtime_AllocateElementArray28Checked(unsigned int n)
             o = 0;
             ((FUN_0044d6c0_class*)&obj)->FUN_00ec78f1((void***)&o);
             obj = (void*)&DAT_010176f8;
-            _CxxThrowException(&obj, (_ThrowInfo*)0x1140ef8);
+            _CxxThrowException(&obj, (_ThrowInfo*)DAT_01140ef8);
         }
     }
     return FormHeap_Allocate(n * 0x1c);

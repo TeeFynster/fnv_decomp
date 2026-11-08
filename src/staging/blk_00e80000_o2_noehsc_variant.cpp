@@ -376,7 +376,7 @@ struct Program
     void* m_auiShapeKeys[5];
     NiTMapBase<NiTPointerAllocator<unsigned int>, const char*, NiD3DVertexShader*>* m_map;
 };
-Program* DAT_0126fa10;
+extern Program* DAT_0126fa10;
 void __cdecl RemoveProgramFromMap(Program* program);
 struct FUN_00e94070_Class
 {

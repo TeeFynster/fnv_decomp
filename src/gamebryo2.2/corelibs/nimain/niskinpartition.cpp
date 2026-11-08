@@ -2,7 +2,7 @@
 // gamebryo2.2/corelibs/nimain/niskinpartition.cpp: NiAccumulator, Partition, Holder, MyCls and more (36 functions)
 
 #include "../../../../include/NiAccumulator.h"
-#include "../../../../include/NiSkinPartition.h"
+#include "../../../../include/NiSkinPartitionGlobals.h"
 #include "../../../../include/MemoryManager.h"
 #include "../../../../include/NiBinaryStream.h"
 #include "../../../../include/NiStream.h"

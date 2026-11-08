@@ -5016,9 +5016,9 @@ extern unsigned int DAT_010c92e0[4];
 extern const double DAT_010217d0;
 extern const LocalM128 DAT_011b6de0;
 extern LocalM128 DAT_010c7170;
-extern const float DAT_010cd644 = 1.0000000272564224e16f;
-extern const float DAT_0104e148 = -3.402820018375656e38f;
-extern const float DAT_0104da48 = 3.402820018375656e38f;
+__declspec(selectany) extern const float DAT_010cd644 = 1.0000000272564224e16f;
+__declspec(selectany) extern const float DAT_0104e148 = -3.402820018375656e38f;
+__declspec(selectany) extern const float DAT_0104da48 = 3.402820018375656e38f;
 float __cdecl NiMax(float a, float b);
 float __cdecl NiMin(float a, float b);
 

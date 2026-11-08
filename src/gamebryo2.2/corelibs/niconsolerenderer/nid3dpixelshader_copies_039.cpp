@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define SetD3DPixelShader SetD3DPixelShader_fnv_0086cf00
+
 
 // Provisional build file (plan B2): exact copies of the nid3dpixelshader recipe for other original addresses.
 // The original identities of these functions are unknown.

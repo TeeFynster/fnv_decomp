@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define SetMustComplete SetMustComplete_fnv_00826b90
+
 // fallout_shared/packagelocation.cpp: LocationDescriptor, TESPackage, BGSMessageInitAccess, OwnQ (31 functions)
 
 #include "../../include/BGSCameraPath.h"

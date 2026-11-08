@@ -1,3 +1,5 @@
+extern "C" unsigned char DAT_011f6370[];
+
 
 // src/staging/blk_00aa0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
@@ -45,7 +47,7 @@ void __thiscall FUN_00aa4790_Class::MemoryManager_GetDefaultHeapStats(int a, int
 // @fnv 0x00aa4bf0
 void SetByteAtOffset(char* p, char c)
 {
-    p[0x11f6370] = c;
+    p[(int)DAT_011f6370] = c;
 }
 
 struct FUN_00aa4c10_class
@@ -547,7 +549,7 @@ char FUN_00aa4760_Class::CallBaseWithOffset(int aiValue, unsigned char b, int c)
 // src: COMMUNITY 0x00aa4be0
 unsigned char __cdecl BSCoreMessage_IsWarningDisabled(char* p)
 {
-    return p[0x11f6370];
+    return p[(int)DAT_011f6370];
 }
 
 struct FUN_00aa4ca0_class

@@ -1828,7 +1828,7 @@ struct TLSData
     bool bConsoleEcho;
 };
 
-__declspec(thread) TLSData g_tlsData;
+extern __declspec(thread) TLSData g_tlsData;
 
 // Sets afReturnValue to the quest's stage (or 0 if no quest), logs it when console echo is on, and returns true.
 // @fnv 0x0059e420

@@ -1,3 +1,6 @@
+class hkMatrix3;
+extern "C" const hkMatrix3 DAT_01268370;
+
 #define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 #define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 #define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
@@ -78,7 +81,7 @@ hkBool hkMatrix3::isOk_00cd4af0() const
 // @fnv 0x00cd4b50
 const hkMatrix3& __cdecl hkMatrix3::GetIdentityTransform() throw()
 {
-    return *reinterpret_cast<const hkMatrix3*>(0x1268370);
+    return DAT_01268370;
 }
 
 static inline void matrixSwap(float& a, float& b)
@@ -879,7 +882,7 @@ void __cdecl hkMatrix3_MultiplyMatrixColumns(float* out, const float* apMatrix, 
     }
 }
 
-extern const float DAT_0104da4c = 1.1920929e-7f;
+__declspec(selectany) extern const float DAT_0104da4c = 1.1920929e-7f;
 extern "C" void hkMatrix3_MultiplyMatrixColumns(void*, const void*, const void*);
 extern "C" void Object_ForwardCall_00cd55a0(void*);
 

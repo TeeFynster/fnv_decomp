@@ -1,3 +1,5 @@
+namespace sd21cc0 { class Target; int __cdecl Object_Dispatch_Thunk(Target*, int, int); }
+
 
 // src/havok/physics/dynamics/constraint/atom/hkpconstraintatom.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/atom/hkpconstraintatom.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -30,7 +32,7 @@ struct FUN_00d21ce0_cls
 void FUN_00d21ce0_cls::hkpBridgeConstraintAtom_init(void* data)
 {
     m_pConstraintData = data;
-    m_pBridge = (void*)0xd21cc0;
+    m_pBridge = (void*)&sd21cc0::Object_Dispatch_Thunk;
 }
 
 // Unlike the four-field hkpConstraintInfo, 0x00d21a60 writes this six-field atom-info record (hkpconstraintdata.cpp).

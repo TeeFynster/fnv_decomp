@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define GetReputationName GetReputationName_fnv_00616710
+
 #include "../../../../include/SettingT.h"
 #include "../../../../include/BSSimpleArray.h"
 // fallout/interface/menus/mapmenu.cpp: MapMenu, Interface, InsertBox, TileImage and more (116 functions)

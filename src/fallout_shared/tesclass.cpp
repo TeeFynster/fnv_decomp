@@ -137,7 +137,7 @@ bool TESClass::Load(TESFile* file)
             break;
     }
     if (!ValidateSkillActorValue())
-        Warning("MASTERFILE: Class %s contains invalid data. Make sure all attributes and skills are unique",
+        Warning("MASTERFILE: Class %s contains invalid data. Make sure all attributes and skills are unique.",
                 GetName());
     return true;
 }

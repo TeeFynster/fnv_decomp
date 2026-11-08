@@ -927,8 +927,8 @@ struct S00dcd270_cls
 #include <xmmintrin.h>
 extern __m128 DAT_010ce1c0;
 static bool Runtime_UpdateState_00dd2fb0(const __m128* a, const __m128* b);
-volatile int g_in0, g_in1;
-volatile int g_out;
+extern volatile int g_in0, g_in1;
+extern volatile int g_out;
 void caller_dd2fb0();
 #include <xmmintrin.h>
 struct Comparison4

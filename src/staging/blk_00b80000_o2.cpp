@@ -1,3 +1,10 @@
+extern int DAT_010b1340;
+extern int DAT_010b1320;
+extern int DAT_010b4c68;
+extern int DAT_010b4c48;
+extern int DAT_010b6a40;
+extern int DAT_010b6a20;
+
 
 // src/staging/blk_00b80000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
@@ -454,8 +461,8 @@ struct FUN_00b8e020 : ImageSpaceEffectShader
 // @fnv 0x00b8e020
 FUN_00b8e020::FUN_00b8e020()
 {
-    m_vft = (void*)0x010b1340;
-    ((int*)this)[0x1b] = (int)0x010b1320;
+    m_vft = (void*)&DAT_010b1340;
+    ((int*)this)[0x1b] = (int)&DAT_010b1320;
     ((TextureArray*)((char*)this + 0x94))->SetSize(2);
 }
 }  // namespace fnv_00b8e020
@@ -972,8 +979,8 @@ struct FUN_00b91680 : ImageSpaceEffectShader
 // @fnv 0x00b91680
 FUN_00b91680::FUN_00b91680()
 {
-    *(void**)((char*)this + 0x0) = (void*)0x010b4c68;
-    *(void**)((char*)this + 0x6c) = (void*)0x010b4c48;
+    *(void**)((char*)this + 0x0) = (void*)&DAT_010b4c68;
+    *(void**)((char*)this + 0x6c) = (void*)&DAT_010b4c48;
     ((NiTPrimitiveArray<::ImageSpaceTexture*>*)((char*)this + 0x94))->SetSize(5);
 }
 }  // namespace fnv_00b91680
@@ -1565,8 +1572,8 @@ struct FUN_00b93180 : public ImageSpaceEffectShader
 // @fnv 0x00b93180
 FUN_00b93180::FUN_00b93180()
 {
-    vtbl = (void*)0x010b6a40;
-    ((void**)((char*)this + 0x6c))[0] = (void*)0x010b6a20;
+    vtbl = (void*)&DAT_010b6a40;
+    ((void**)((char*)this + 0x6c))[0] = (void*)&DAT_010b6a20;
     ((NiTPrimitiveArray<::ImageSpaceTexture*>*)((char*)this + 0x94))->SetSize(2);
 }
 }  // namespace fnv_00b93180

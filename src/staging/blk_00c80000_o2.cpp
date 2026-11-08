@@ -2581,7 +2581,7 @@ struct TlsBlock_t
     int m_2b4;
 };
 
-__declspec(thread) TlsBlock_t g_tlsBlock;
+extern __declspec(thread) TlsBlock_t g_tlsBlock;
 
 struct TlsGuard_t
 {

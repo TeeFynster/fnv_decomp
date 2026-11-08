@@ -236,7 +236,7 @@ extern char DAT_01202a40[0x104];
 extern char DAT_01202fa0[0x104];
 void __cdecl MessageHandler_SetProgrammerOutputFileName(const char* p);
 extern const void* DAT_010c14a8;
-MessageHandler* MessageHandler::pHandler;
+
 struct FUN_00c3c070_Class
 {
     void* __thiscall std__Ref_count_base__Get_deleter(int arg);

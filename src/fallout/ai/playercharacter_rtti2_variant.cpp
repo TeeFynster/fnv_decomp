@@ -1,3 +1,6 @@
+class NiPoint3;
+extern "C" const NiPoint3 DAT_011f426c;
+
 // src/fallout/ai/playercharacter_rtti2_variant.cpp - RTTI variant unit created 2026-11-01 by rtti_variants.py for paused functions whose original code needs
 // polymorphic classes (MagicItem, SpellItem). Unused skeleton declarations have been removed so this unit can use
 // the shared include/ definitions; move the functions to their real unit once its classes are polymorphic.
@@ -1843,16 +1846,13 @@ struct PlayerSave
     void PlayerCharacter_SaveGame(unsigned int flags);
 };
 
-// Original read-only string addresses, independent of MSVC literal numbering.
+// Read-only strings shared with the original save logging code.
 namespace PlayerSaveStrings
 {
-    enum
-    {
-        kSaveFormLog = 0x010153a0,
-        kSaveLog = 0x0101536c,
-        kOversizedBlockLog = 0x01015318,
-        kPlayerSourcePath = 0x0108a8e0
-    };
+    extern "C" const char DAT_010153a0[];
+    extern "C" const char DAT_0101536c[];
+    extern "C" const char DAT_01015318[];
+    extern "C" const char DAT_0108a8e0[];
 }
 
 extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
@@ -1887,22 +1887,22 @@ void PlayerSave::PlayerCharacter_SaveGame(unsigned int flags)
             if (reference)
             {
                 TESForm* form = TESForm_GetFormByNumericID(reference->formID);
-                SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::kSaveFormLog),
+                SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::DAT_010153a0),
                         endPosition4 - initialPosition3, reference->formID, form->GetName(),
                         *(unsigned int*)&reference->detail0, 0x3378,
-                        reinterpret_cast<const char*>(PlayerSaveStrings::kPlayerSourcePath));
+                        reinterpret_cast<const char*>(PlayerSaveStrings::DAT_0108a8e0));
             }
             else
-                SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::kSaveLog), endPosition4 - initialPosition3, 0x3378,
-                        reinterpret_cast<const char*>(PlayerSaveStrings::kPlayerSourcePath));
+                SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::DAT_0101536c), endPosition4 - initialPosition3, 0x3378,
+                        reinterpret_cast<const char*>(PlayerSaveStrings::DAT_0108a8e0));
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned char* endPositionA = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
             unsigned char* sizePosition = blockStart9;
             if (endPositionA > sizePosition + 0xffff)
-                FNV_Warning(reinterpret_cast<const char*>(PlayerSaveStrings::kOversizedBlockLog),
-                            reinterpret_cast<const char*>(PlayerSaveStrings::kPlayerSourcePath), 0x3378);
+                FNV_Warning(reinterpret_cast<const char*>(PlayerSaveStrings::DAT_01015318),
+                            reinterpret_cast<const char*>(PlayerSaveStrings::DAT_0108a8e0), 0x3378);
             *(unsigned short*)blockStart9 = (unsigned short)(endPositionA - sizePosition);
         }
     }
@@ -1924,9 +1924,8 @@ void PlayerSave::PlayerCharacter_SaveGame(unsigned int flags)
             if (flags & 0x10000000)
                 Animation_SaveAnimation(this, unk690);
             // Serialize the original raw vector copy without calling the shared NiPoint3 copy constructor.
-            // 0x011f426c is NiPoint3_ZERO; its old binding uses a struct tag, while the shared type uses class.
             unsigned int position[3];
-            memcpy(position, &(unk6f4 ? unk6f4->GetPosition() : *reinterpret_cast<const NiPoint3*>(0x011f426c)), 12);
+            memcpy(position, &(unk6f4 ? unk6f4->GetPosition() : DAT_011f426c), 12);
             TESForm_SaveGameDataOLD(&unk64a, 1);
             TESForm_SaveGameDataOLD(&unk64d, 1);
             TESForm_SaveGameDataOLD(&unk651, 1);
@@ -2290,22 +2289,22 @@ void PlayerSave::PlayerCharacter_SaveGame(unsigned int flags)
             if (reference4)
             {
                 TESForm* form2 = TESForm_GetFormByNumericID(reference4->formID);
-                SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::kSaveFormLog),
+                SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::DAT_010153a0),
                         endPosition2 - initialPosition3, reference4->formID, form2->GetName(),
                         *(unsigned int*)&reference4->detail0, 0x3592,
-                        reinterpret_cast<const char*>(PlayerSaveStrings::kPlayerSourcePath));
+                        reinterpret_cast<const char*>(PlayerSaveStrings::DAT_0108a8e0));
             }
             else
-                SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::kSaveLog), endPosition2 - initialPosition3, 0x3592,
-                        reinterpret_cast<const char*>(PlayerSaveStrings::kPlayerSourcePath));
+                SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::DAT_0101536c), endPosition2 - initialPosition3, 0x3592,
+                        reinterpret_cast<const char*>(PlayerSaveStrings::DAT_0108a8e0));
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned char* endPosition5 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
             unsigned char* sizePosition2 = blockStart9;
             if (endPosition5 > sizePosition2 + 0xffff)
-                FNV_Warning(reinterpret_cast<const char*>(PlayerSaveStrings::kOversizedBlockLog),
-                            reinterpret_cast<const char*>(PlayerSaveStrings::kPlayerSourcePath), 0x3592);
+                FNV_Warning(reinterpret_cast<const char*>(PlayerSaveStrings::DAT_01015318),
+                            reinterpret_cast<const char*>(PlayerSaveStrings::DAT_0108a8e0), 0x3592);
             *(unsigned short*)blockStart9 = (unsigned short)(endPosition5 - sizePosition2);
         }
     }

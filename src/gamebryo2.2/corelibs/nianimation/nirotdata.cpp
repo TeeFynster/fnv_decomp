@@ -288,7 +288,7 @@ void __fastcall AppendNumKeysToStringArray(NiRotData* self, int, StrArr* apViewe
         apViewerStrings->SetSize(uiSize + apViewerStrings->m_usGrowBy);
     apViewerStrings->SetAt(uiSize, pString);
 
-    pString = NiGetViewerString_00a7d510("self->m_uiNumKeys", self->m_uiNumKeys);
+    pString = NiGetViewerString_00a7d510("m_uiNumKeys", self->m_uiNumKeys);
 
     uiSize = apViewerStrings->m_usSize;
     if (uiSize >= apViewerStrings->m_usMaxSize)

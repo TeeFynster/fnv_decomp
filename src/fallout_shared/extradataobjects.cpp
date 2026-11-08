@@ -1,3 +1,6 @@
+extern char DAT_0118461c;
+extern int DAT_011841e8;
+
 #include "../../include/BSStringT.h"
 // fallout_shared/extradataobjects.cpp: extra-data objects (294 matched functions)
 
@@ -2194,7 +2197,7 @@ bool __thiscall ExtraPoison::IsDifferent(BSExtraData* apCompare)
 #if defined(_M_IX86)
     // The original image's descriptor uses the old struct spelling.
     ExtraPoison* pcomp = static_cast<ExtraPoison*>(__RTDynamicCast(
-        apCompare, 0, &DAT_01183b2c, reinterpret_cast<void*>(0x0118461c), 0));
+        apCompare, 0, &DAT_01183b2c, reinterpret_cast<void*>(&DAT_0118461c), 0));
 #else
     ExtraPoison* pcomp = dynamic_cast<ExtraPoison*>(apCompare);
 #endif
@@ -2501,7 +2504,7 @@ bool __thiscall ExtraRadioData::CompareRadioData(BSExtraData* apCompare)
 #if defined(_M_IX86)
     // The original image's descriptor uses the old struct spelling.
     ExtraRadioData* pComp = static_cast<ExtraRadioData*>(__RTDynamicCast(
-        apCompare, 0, &DAT_01183b2c, reinterpret_cast<void*>(0x011841e8), 0));
+        apCompare, 0, &DAT_01183b2c, reinterpret_cast<void*>(&DAT_011841e8), 0));
 #else
     ExtraRadioData* pComp = dynamic_cast<ExtraRadioData*>(apCompare);
 #endif

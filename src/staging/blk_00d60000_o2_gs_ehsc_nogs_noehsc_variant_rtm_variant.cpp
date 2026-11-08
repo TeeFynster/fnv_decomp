@@ -1006,12 +1006,12 @@ struct FUN_00d76c20_cls
     int ForwardToTarget(int iSelector, int iArg0, int iArg1, int iArg2);
 };
 static int ToLowerCase(char c);
-volatile char g_d61430_c;
-char g_d61430_sink;
+extern volatile char g_d61430_c;
+extern char g_d61430_sink;
 void d61430_caller();
 static int toupper_00d61450(char c);
-volatile char g_d61450_c;
-char g_d61450_sink;
+extern volatile char g_d61450_c;
+extern char g_d61450_sink;
 void d61450_caller();
 struct D6C1B0Owner
 {
@@ -1020,8 +1020,8 @@ struct D6C1B0Owner
     int unk08;
 };
 extern "C" D6C180Command** d6c1b0_cursor_src(void);
-volatile int g_d6c1b0_a1;
-D6C1B0Owner* volatile g_d6c1b0_owner;
+extern volatile int g_d6c1b0_a1;
+extern D6C1B0Owner* volatile g_d6c1b0_owner;
 static void callBridgeFromAtom(D6C180Command** ppkCursor, D6C1B0Owner* pOwner, int a1);
 void d6c1b0_caller(void);
 typedef ::__m128 LocalM128;
@@ -1045,8 +1045,8 @@ struct IntegratorD720
     float state;
 };
 static float Object_ComputeValue_00d720a0(IntegratorD720* self, float input, float step);
-IntegratorD720* volatile integratorD720;
-volatile float inputD720, stepD720, resultD720;
+extern IntegratorD720* volatile integratorD720;
+extern volatile float inputD720, stepD720, resultD720;
 void invokeD720();
 struct FUN_00d74dc0_cls
 {

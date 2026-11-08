@@ -1,3 +1,6 @@
+// Matched operands prove the original import slot named below.
+#define FreeLibrary fnv_Import_CloseHandle_00fdf07c
+
 #include "../../include/BSThreadCriticalSectionPC.h"
 
 // src/staging/blk_00b00000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit

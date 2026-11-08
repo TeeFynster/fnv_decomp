@@ -995,7 +995,7 @@ class C9F270Object
     void GetViewerStringsBase(C9F270StrArray* pkStrings);
     void bhkSimpleShapePhantom_GetViewerStrings(C9F270StrArray* pkStrings);
 };
-__declspec(thread) int tlsMode = 0x3b;
+extern __declspec(thread) int tlsMode;
 struct ReleaseObject
 {
     void DestroyObject(int value);
@@ -1260,7 +1260,7 @@ struct TLSBlock
     int unk2b0;
     int value;
 };
-__declspec(thread) TLSBlock g_tls;
+extern __declspec(thread) TLSBlock g_tls;
 struct ThreadFlagGuard
 {
     int previous;

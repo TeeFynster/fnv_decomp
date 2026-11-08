@@ -329,7 +329,7 @@ struct FUN_00c87650_t : NiObjLB
     virtual void LoadBinary(NiStream& stream);
 };
 extern "C" void __stdcall LeaveCriticalSection(void*);
-void(__stdcall* DAT_0126813c_leave)(void*);
+extern void(__stdcall* DAT_0126813c_leave)(void*);
 void bhkSerializable_CloneCritUnlock();
 struct FUN_00c88410_t
 {
@@ -1364,7 +1364,7 @@ struct TlsBlock_t
     int unk2B0;
     int m_2b4;
 };
-__declspec(thread) TlsBlock_t g_tlsBlock;
+extern __declspec(thread) TlsBlock_t g_tlsBlock;
 struct TlsGuard_t
 {
     int m_saved;
@@ -6681,7 +6681,7 @@ struct C817D0TlsBlock
     int unk2BC;
     int m_2c0;
 };
-__declspec(thread) C817D0TlsBlock g_c817d0Tls;
+extern __declspec(thread) C817D0TlsBlock g_c817d0Tls;
 struct C817D0Cls
 {
     virtual void vf00();

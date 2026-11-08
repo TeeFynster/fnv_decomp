@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define DestroyIfFlagged DestroyIfFlagged_fnv_00b8a360
+
 #include "../../include/NiD3DGPUProgramCache.h"
 #include "../../include/NiD3DPass.h"
 #include "../../include/NiD3DPixelShader.h"

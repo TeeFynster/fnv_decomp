@@ -1047,7 +1047,7 @@ struct NavMeshLookupView_00693d70
     NavMeshInfo* FindReferenceByFormId();
 };
 
-unsigned int _data_011c16bc;
+extern unsigned int _data_011c16bc;
 int g_TES;
 
 // @fnv 0x006e0070

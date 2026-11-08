@@ -78,7 +78,7 @@ struct FUN_00d58510 : public ShapeD22DC0
 extern "C" __m128 _mm_setr_ps(float x, float y, float z, float w);
 extern "C" void _ReadWriteBarrier();
 extern const float DAT_010c4990 = -0.0f;
-extern const float DAT_01011d78 = 0.0f;
+__declspec(selectany) extern const float DAT_01011d78 = 0.0f;
 
 struct BoxBuild2190AllocCtx
 {

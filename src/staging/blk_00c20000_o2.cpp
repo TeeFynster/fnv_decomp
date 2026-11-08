@@ -1,3 +1,6 @@
+extern "C" void* const DAT_010bfa54[];
+extern "C" void* const DAT_010bf0bc[];
+
 // staging/blk_00c20000_o2.cpp: NiPSysParticle, NiPSysBoxEmitter, Host, NiPSysBoxEmitterWrapper and more (45 functions)
 
 #include <windows.h>
@@ -170,7 +173,7 @@ void* __cdecl NiPSysEmitterInitialRadiusCtlr_CreateObject()
     {
         BSFadeNode* obj = (BSFadeNode*)node;
         obj->FUN_00c32d80();
-        *reinterpret_cast<void**>(node) = (void*)0x010bfa54;
+        *reinterpret_cast<void**>(node) = (void*)DAT_010bfa54;
         return node;
     }
     return 0;
@@ -780,7 +783,7 @@ void* __cdecl NiPSysGrowFadeModifier_CreateObject()
         *(float*)((char*)pObject + 0x20) = zero;
         *(short*)((char*)pObject + 0x1c) = 0;
         *(float*)((char*)pObject + 0x28) = zero;
-        *(int*)pObject = 0x10bf0bc;
+        *(int*)pObject = (int)DAT_010bf0bc;
         *(short*)((char*)pObject + 0x24) = 0;
         return pObject;
     }

@@ -7,7 +7,7 @@
 #include "../../../include/IntSeenData.h"
 #include "seendata_decls.h"
 #include "../../../include/BGSSaveFormBuffer.h"
-#include "../../../include/TESSaveLoadGame.h"
+#include "../../../include/TESSaveLoadGameGlobals.h"
 
 // @fnv 0x0087a0e0
 void SeenData::LoadGame(BGSLoadFormBuffer* buffer)

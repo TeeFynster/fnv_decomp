@@ -1,3 +1,7 @@
+extern "C" const double DAT_01032980;
+extern "C" const char DAT_01032930[];
+extern "C" const float DAT_0101e2bc;
+
 // fallout_shared/bgscamerashot.cpp: BGSCameraShot (16 functions)
 
 #include "layout_support.h"
@@ -38,10 +42,10 @@ void BGSCameraShot::InitItem()
     if (GetInitialized())
         return;
     TESImageSpaceModifiableForm::InitItem(this);
-    if (Data.m_fTimeMultiplier < *reinterpret_cast<const double*>(0x01032980))
+    if (Data.m_fTimeMultiplier < DAT_01032980)
     {
-        Warning(reinterpret_cast<const char*>(0x01032930), GetName());
-        Data.m_fTimeMultiplier = *reinterpret_cast<const float*>(0x0101e2bc);
+        Warning(DAT_01032930, GetName());
+        Data.m_fTimeMultiplier = DAT_0101e2bc;
     }
     SetInitializationState(true);
 }

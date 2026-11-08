@@ -1,3 +1,5 @@
+extern "C" void* const DAT_010c5ce4[];
+
 #include "../../../../../include/BSThreadCriticalSectionPC.h"
 #include "../../../../../include/hkArray.h"
 
@@ -12375,7 +12377,7 @@ __forceinline bhkRefObject* CreateRefObject()
         *(unsigned int*)((char*)obj + 12) = 0;
         DAT_01268188 += inc;
         _ReadWriteBarrier();
-        *(const void**)obj = (const void*)0x10c5ce4;
+        *(const void**)obj = (const void*)DAT_010c5ce4;
         _ReadWriteBarrier();
         DAT_01268318 += inc;
     }

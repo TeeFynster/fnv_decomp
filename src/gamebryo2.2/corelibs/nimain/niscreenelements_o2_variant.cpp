@@ -1,3 +1,5 @@
+extern char DAT_0109e984;
+
 // src/gamebryo2.2/corelibs/nimain/niscreenelements_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nimain/niscreenelements.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
@@ -19,7 +21,7 @@ extern "C" void _delete(void*, unsigned int);
 // @fnv 0x00a87830
 NiScreenElements* __thiscall NiScreenElements::FUN_00a87830(unsigned int flags)
 {
-    *reinterpret_cast<void**>(this) = (void*)0x0109e984;
+    *reinterpret_cast<void**>(this) = (void*)&DAT_0109e984;
     FUN_00a89760();
     if (flags & 1)
         _delete(this, 0xc4);

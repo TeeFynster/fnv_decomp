@@ -436,7 +436,7 @@ struct S_cbde40_Tls
     int unk2B0;
     int unk2B4;
 };
-__declspec(thread) S_cbde40_Tls g_tls_cbde40;
+extern __declspec(thread) S_cbde40_Tls g_tls_cbde40;
 struct S_cbde40_Guard
 {
     int saved;

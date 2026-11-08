@@ -922,7 +922,7 @@ struct CombatTimeStampLoadGame
 {
     void __thiscall LoadGame(BGSLoadFormBuffer* pBuffer);
 };
-double DAT_0101db88;
+extern double DAT_0101db88;
 struct FUN_00985be0_shell : public FUN_00985bb0_Class
 {
     NiColorA* GetEffectColor(NiColorA* result);

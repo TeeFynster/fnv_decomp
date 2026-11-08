@@ -1603,7 +1603,7 @@ static int DCD6A0GetAgentId(DCD6A0AgentFunc func)
     return (func == DCD6A0Agent9) ? 9 : 0;
 }
 // Taking the helper's address keeps its standard stack argument, as the original codegen shows.
-int(__cdecl* g_DCD6A0GetAgentId)(DCD6A0AgentFunc) = DCD6A0GetAgentId;
+extern int(__cdecl* g_DCD6A0GetAgentId)(DCD6A0AgentFunc);
 int __cdecl DispatchItemToAgent(int expected, DCD6A0Context** contextPtr, int a, int b, DCD6A0Item* item);
 struct S_00dcdd80_Heap
 {

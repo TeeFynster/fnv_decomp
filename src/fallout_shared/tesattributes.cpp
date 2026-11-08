@@ -58,8 +58,8 @@ unsigned short TESAttributes::GetSaveSize(unsigned int param)
     return result;
 }
 
-#include "../../include/TESSaveLoadGame.h"
-TESSaveLoadGame* g_TESSaveLoadGame;
+#include "../../include/TESSaveLoadGameGlobals.h"
+
 
 // @fnv 0x00480240
 void __thiscall TESAttributes::LoadGame(unsigned int aFlags, unsigned int aDummy)

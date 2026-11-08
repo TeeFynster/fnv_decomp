@@ -1848,7 +1848,7 @@ struct d20base
 {
     int f0;
 };
-d20base* volatile g_d20_self;
+extern d20base* volatile g_d20_self;
 extern "C" int d20_sel(void);
 static int numIndices_00d49c20(d20base* self, int sel);
 int d20_probe(void);
@@ -1861,9 +1861,9 @@ int d20_probe(void);
 // eax): it is a helper VC9 gives a private register convention because its
 // callers are known at compile time. Defining it as a static noinline
 // helper with its caller in this file reproduces that convention.
-volatile int g_base_d4b390;
-volatile int g_code_d4b390;
-volatile int g_sink_d4b390;
+extern volatile int g_base_d4b390;
+extern volatile int g_code_d4b390;
+extern volatile int g_sink_d4b390;
 static int storageMeshShape_numIndices(int base, int code);
 void elem_size_case_d4b390(void);
 struct hkpD500Stream;
@@ -2019,7 +2019,7 @@ struct D47180Cls
     int IsHelperResultFalse_00d47180(int arg);
 };
 static char* Object_ProcessEntries_00d48420(char* p);
-volatile char* g_d48420_p;
+extern volatile char* g_d48420_p;
 char* d48420_caller();
 struct FieldWord
 {
@@ -3048,10 +3048,10 @@ struct S
 };
 extern "C" void __cdecl ReleaseAllEntries(S* a, int b, int c);
 static void resetGskManifold(S* dst, S* src, int b, int c);
-volatile S* g_dst;
-volatile S* g_src;
-volatile int g_b;
-volatile int g_c;
+extern volatile S* g_dst;
+extern volatile S* g_src;
+extern volatile int g_b;
+extern volatile int g_c;
 void caller();
 class FUN_00cb0a60 : public hkStringPtr
 {

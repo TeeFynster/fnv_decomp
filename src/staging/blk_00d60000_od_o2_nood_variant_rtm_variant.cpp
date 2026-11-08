@@ -264,10 +264,10 @@ struct D6Idx
 extern "C" void __cdecl hk1dLinearBilateralConstraintBuildJacobian(D6Vec3* s, void* d, void* e);
 extern "C" V16* __cdecl D6GetArray(void);
 void Runtime_UpdateState_00d6c030(D6Owner* a, V16* b, D6Idx* c, void* d, void* e);
-volatile D6Owner* g_d6Owner;
-volatile D6Idx* g_d6Idx;
-volatile void* g_d6D;
-volatile void* g_d6E;
+extern volatile D6Owner* g_d6Owner;
+extern volatile D6Idx* g_d6Idx;
+extern volatile void* g_d6D;
+extern volatile void* g_d6E;
 extern "C" __declspec(noinline) void d6c030_dummy_caller(void)
 {
     Runtime_UpdateState_00d6c030((D6Owner*)g_d6Owner, D6GetArray(), (D6Idx*)g_d6Idx, (void*)g_d6D, (void*)g_d6E);

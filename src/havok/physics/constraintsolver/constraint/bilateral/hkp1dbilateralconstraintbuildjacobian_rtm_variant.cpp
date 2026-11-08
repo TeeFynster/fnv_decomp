@@ -227,10 +227,10 @@ void __cdecl hk1dLinearFrictionBuildJacobian(S_00dcf100_In* pInput, S_00dcf100_C
 void __cdecl hkLoadVelocityAccumulators();
 extern double DAT_010c9300;
 static void Object_BuildLinearAngularJacobianRow(Jac_dcf880* out, const Info_dcf880* info, const QueryIn_dcf880* in, float scale);
-Jac_dcf880* volatile g_out_dcf460;
-const Info_dcf880* volatile g_info_dcf460;
-const QueryIn_dcf880* volatile g_in_dcf460;
-volatile float g_scale_dcf460;
+extern Jac_dcf880* volatile g_out_dcf460;
+extern const Info_dcf880* volatile g_info_dcf460;
+extern const QueryIn_dcf880* volatile g_in_dcf460;
+extern volatile float g_scale_dcf460;
 void CallTarget_dcf460();
 struct Input_dcf5b0
 {

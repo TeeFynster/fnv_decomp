@@ -1,3 +1,10 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define CreateObj CreateObj_fnv_00845260
+
+extern int DAT_0107ec88;
+extern int DAT_0107f4e8;
+
 #include "../../include/BSStringT.h"
 
 // src/staging/blk_00840000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
@@ -794,7 +801,7 @@ struct FUN_00844660_Class
 // src: GUESS 0x00844660 (confidence: medium)
 void FUN_00844660_Class::ReleaseStorage_00844660()
 {
-    m_vtbl = (int)0x0107ec88;
+    m_vtbl = (int)&DAT_0107ec88;
     NiTPointerMap_RemoveAll();
     _NiFreeAlias((void*)m_data);
 }
@@ -888,7 +895,7 @@ struct FUN_0084ba20
 // @fnv 0x0084ba20
 void FUN_0084ba20::Init()
 {
-    m_vft = (void*)0x0107f4e8;
+    m_vft = (void*)&DAT_0107f4e8;
     NiTPointerMapRemoveAll();
     _NiFreeAlias(m_data);
 }

@@ -520,7 +520,7 @@ void Ce12a0Host::UpdateFields_00ce12a0(void* a1, void* a2, hkQsTransform* a3, hk
     }
 }
 
-extern const float DAT_0104da4c = 1.1920928955078125e-7f;
+__declspec(selectany) extern const float DAT_0104da4c = 1.1920928955078125e-7f;
 
 struct ByteResult
 {

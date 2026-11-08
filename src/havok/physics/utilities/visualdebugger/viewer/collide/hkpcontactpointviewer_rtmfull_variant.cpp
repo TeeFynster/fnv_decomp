@@ -560,7 +560,7 @@ extern const float DAT_01016248;
 extern const float DAT_01019de0;
 
 extern const float DAT_010c69c4;
-extern const float DAT_010c69c0 = -(1.0f - 0.85f);
+__declspec(selectany) extern const float DAT_010c69c0 = -(1.0f - 0.85f);
 
 extern const LocalM128 DAT_010ec7f0;
 

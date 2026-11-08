@@ -1,3 +1,5 @@
+extern int DAT_010bc8a4;
+
 
 // src/staging/blk_00c00000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
@@ -1522,7 +1524,7 @@ struct FUN_00c033c0
 FUN_00c033c0::FUN_00c033c0()
 {
     ((ImageSpaceEffect*)this)->ImageSpaceEffect::ImageSpaceEffect();
-    *(int*)this = 0x10bc8a4;
+    *(int*)this = (int)&DAT_010bc8a4;
     *(volatile unsigned char*)((char*)this + 0x58) = 0;
     *(volatile unsigned char*)((char*)this + 0x59) = 0;
     *(volatile unsigned char*)((char*)this + 0x5a) = 0;

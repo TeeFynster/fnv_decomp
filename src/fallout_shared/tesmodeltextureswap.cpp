@@ -171,7 +171,7 @@ void TESModelTextureSwap::ApplyTextureSwaps(NiAVObject* object)
         SetWarningState(false);
         if (warningCount != Warning())
             Warning(
-                "Warnings were encountered during texture swap for model '%s'. Check warnings file for more information.",
+                "Warnings were encountered during texture swap for model '%s'. Check warnings file for more details.",
                 GetModelFilePath());
     }
 }

@@ -1828,7 +1828,7 @@ struct AudioTlsState {
  int unk2B0;
  int unk2B4;
 };
-__declspec(thread) AudioTlsState threadData;
+extern __declspec(thread) AudioTlsState threadData;
 struct MemoryScope {
  int previous;
  MemoryScope() {previous=threadData.unk2B4;threadData.unk2B4=16;}
@@ -1919,7 +1919,7 @@ public:
 // Stand-in declarations; unknown fields are named by their byte offset.
 // External callees keep the pack's FUN_ names and bind through relocations.
 struct Tls676 { char m_pad0000[0x2b4]; int m_2b4; };
-__declspec(thread) Tls676 g_tls676;
+extern __declspec(thread) Tls676 g_tls676;
 struct Elem676;
 struct Sub676 { char m_pad0000[0x14]; unsigned char m_14; };
 struct Elem676 { char m_pad0000[0xc]; Sub676* m_iThirdValue; void removeReference(); };
@@ -2445,8 +2445,8 @@ struct WorldQuery : hkpWorld { void hkpWorld_linearCast(void*,void*,void*,void*)
 extern "C" void __cdecl enumerateAllConstraintsInIsland(void* object, void* value);
 struct zzVal_c92860 { void* v; };
 static void InvokeOnAllOwners(FUN_00c928c0_Context* ctx, zzVal_c92860 value);
-FUN_00c928c0_Context* volatile zz_ctx_c92860 = 0;
-void* volatile zz_val_c92860 = 0;
+extern FUN_00c928c0_Context* volatile zz_ctx_c92860;
+extern void* volatile zz_val_c92860;
 void zz_call_c92860(void);
 void __cdecl hkSmallArrayUtil__reserveMore(void* apvArray, int iSizeElem);
 class EntityC92B;
@@ -3212,9 +3212,9 @@ struct OverlapContext {
     OverlapFilter filter;
 };
 static void SyncOverlap(OverlapPhantom* phantom, OverlapCollidable* other, OverlapContext* context);
-OverlapPhantom* volatile overlapPhantom;
-OverlapCollidable* volatile overlapOther;
-OverlapContext* volatile overlapContext;
+extern OverlapPhantom* volatile overlapPhantom;
+extern OverlapCollidable* volatile overlapOther;
+extern OverlapContext* volatile overlapContext;
 void invokeOverlap();
 void nullsub_6();
 void __cdecl hkpWorld_unlockReadOnly(void);
@@ -3301,8 +3301,8 @@ struct PhantomSink {
     void hkpPhysicsSystem_addPhantom(hkpPhantom* p);
 };
 static void enumerateAllPhantomsInWorld(PhantomWorld* world, PhantomSink* out);
-PhantomWorld* volatile g_world;
-PhantomSink* volatile g_out;
+extern PhantomWorld* volatile g_world;
+extern PhantomSink* volatile g_out;
 void invokePhantomCopy();
 
 __forceinline void timer(const char* name, const char* first = 0) {
@@ -3964,9 +3964,9 @@ if (pairs.size == (pairs.capacityAndFlags & 0x3fffffff)) ResizeAudioStream(route
 constructPairs(pairs.data+pairs.size,1);
 return pairs.data[pairs.size++];
 }
-PhantomInterface* volatile probePhantom;
-CollisionObject* volatile probeObject;
-CollisionFilter* volatile probeFilter;
+extern PhantomInterface* volatile probePhantom;
+extern CollisionObject* volatile probeObject;
+extern CollisionFilter* volatile probeFilter;
 void probeOverlapCaller();
 
 
@@ -4051,9 +4051,9 @@ struct BoolResult {
     BoolResult(bool v) : value(v) {}
 };
 static BoolResult AddBodiesToSystem(Context_s* a2, ...);
-Context_s* volatile retry_context;
-System_s* volatile retry_system;
-volatile char retry_result;
+extern Context_s* volatile retry_context;
+extern System_s* volatile retry_system;
+extern volatile char retry_result;
 void retryCaller();
 // FUN_00c98240 : MSVC this-adjusting thunk  (sub ecx, 0x08 ; jmp <impl>)
 struct A1_00c98240 {
@@ -4775,9 +4775,9 @@ struct Mgr {
 };
 extern void* __cdecl hkpWorldOperationUtil_addConstraintImmediately(Mgr*, Item*, unsigned int);
 static unsigned char enumerateAllEntitiesInWorld(MatchWorld* world, FUN_00d065e0* system);
-MatchWorld* volatile g_matchWorld;
-FUN_00d065e0* volatile g_matchSystem;
-volatile unsigned char g_matchResult;
+extern MatchWorld* volatile g_matchWorld;
+extern FUN_00d065e0* volatile g_matchSystem;
+extern volatile unsigned char g_matchResult;
 void CallMatchSystem();
 void __stdcall hkpWorld_UpdateState_00c982d0(unsigned char* out, int a2, int a3);
 struct S96_BoolResult {char value;};
@@ -6586,7 +6586,7 @@ struct TlsBlk_caa4a0 {
     unsigned int m_02b0;
     int m_02b4;
 };
-__declspec(thread) TlsBlk_caa4a0 g_tlsBlock;
+extern __declspec(thread) TlsBlk_caa4a0 g_tlsBlock;
 class TlsGuard_caa4a0 {
 public:
     int m_saved;

@@ -213,10 +213,10 @@ static void decompressBlockToCache_00e34d80(hkaDeltaCompressedAnimation* anim, u
 // dummy callers negotiating the private conventions (never byte-compared)
 extern "C" void dq_args_fill(DqArgs* out);
 extern "C" float* dq_dst2_src(void);
-hkaDeltaCompressedAnimation* volatile dq_anim_g;
-unsigned int volatile dq_time_g;
-float* volatile dq_dst_g;
-unsigned int volatile dq_count_g;
+extern hkaDeltaCompressedAnimation* volatile dq_anim_g;
+extern unsigned int volatile dq_time_g;
+extern float* volatile dq_dst_g;
+extern unsigned int volatile dq_count_g;
 void dq_call(void);
 void dq_call2(void)
 {

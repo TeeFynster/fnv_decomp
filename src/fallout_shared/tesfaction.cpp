@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define DestroyAndFree DestroyAndFree_fnv_005fc8d0
+
 #include "../../include/BSStringT.h"
 // fallout_shared/tesfaction.cpp: faction records, reactions, and rank data.
 

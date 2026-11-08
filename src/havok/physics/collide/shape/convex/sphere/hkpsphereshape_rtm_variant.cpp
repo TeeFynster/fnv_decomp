@@ -122,7 +122,7 @@ class RayMask
         return _mm_movemask_ps(bits) & lane;
     }
 };
-const RayMask::Component RayMask::components[4] = {RayMask::X, RayMask::Y, RayMask::Z, RayMask::W};
+__declspec(selectany) const RayMask::Component RayMask::components[4] = {RayMask::X, RayMask::Y, RayMask::Z, RayMask::W};
 static const LocalM128 signVector = {{-0.0f, -0.0f, -0.0f, -0.0f}};
 static const LocalM128 tripleVector = {{3.0f, 3.0f, 3.0f, 3.0f}};
 static const LocalM128 halfVector = {{0.5f, 0.5f, 0.5f, 0.5f}};

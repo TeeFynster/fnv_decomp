@@ -1,3 +1,5 @@
+extern int DAT_010a2970;
+
 #include "../../include/NiTMapItem.h"
 
 // src/staging/blk_00aa0000_od_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
@@ -2707,7 +2709,7 @@ struct S00aa8950_Obj : FUN_00aa8be0_cls
 // @fnv 0x00aa8950
 void* __thiscall S00aa8950_Obj::FUN_00aa8950(unsigned int flags)
 {
-    ((int*)this)[0] = 0x010a2970;
+    ((int*)this)[0] = (int)&DAT_010a2970;
     {
         S00aa8950_ReleaseGuard guard;
         ClearList();
@@ -6606,7 +6608,7 @@ unsigned char __cdecl fffReadEgmFile(const std::Str& pStr, int* pOut, Arr28* pA,
 }
 }  // namespace fnv_00aafc80
 
-int g_sink;
+extern int g_sink;
 
 struct Ab0a30Chunk
 {

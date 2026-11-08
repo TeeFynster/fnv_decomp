@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define DestroyIfFlagged DestroyIfFlagged_fnv_00bcae60
+
 #define FNV64_NIPOINTER_COMPARE_DECLS
 #include "../../include/NiPointer.h"
 // bsshader/tileshader.cpp: TileShader and render helpers (18 functions)

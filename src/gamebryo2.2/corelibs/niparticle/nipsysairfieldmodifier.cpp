@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define SaveBinary SaveBinary_fnv_00c302a0
+
 #include "../../../../include/NiPSysData.h"
 #include "../../../../include/NiBinaryStream.h"
 #include "../../../../include/NiStream.h"

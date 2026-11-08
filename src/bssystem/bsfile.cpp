@@ -1,3 +1,11 @@
+struct FUN_00affa10_V;
+int __cdecl BSFile_ReadAndSwap(FUN_00affa10_V*, void*, unsigned int, void*, void*);
+struct VTableV18_b7074;
+int __cdecl BSFile_WriteAndSwap(VTableV18_b7074*, unsigned int, unsigned int, void*, void*);
+struct DummyVTable_00aff9d0;
+int __cdecl ForwardVTableCall(DummyVTable_00aff9d0*, int, int);
+void __cdecl CallVirtualMethodAtOffset48(void*, int, int);
+
 // bssystem/bsfile.cpp: BSFile, BSFileW (21 functions)
 
 #include "bsfile_decls.h"
@@ -55,13 +63,13 @@ void BSFile::SetEndianSwap(bool doSwap)
 {
     if (doSwap)
     {
-        m_pfnRead = reinterpret_cast<NIBINARYSTREAM_READFN>(0x00affa10);
-        m_pfnWrite = reinterpret_cast<NIBINARYSTREAM_WRITEFN>(0x00affa60);
+        m_pfnRead = reinterpret_cast<NIBINARYSTREAM_READFN>(&BSFile_ReadAndSwap);
+        m_pfnWrite = reinterpret_cast<NIBINARYSTREAM_WRITEFN>(&BSFile_WriteAndSwap);
     }
     else
     {
-        m_pfnRead = reinterpret_cast<NIBINARYSTREAM_READFN>(0x00aff9d0);
-        m_pfnWrite = reinterpret_cast<NIBINARYSTREAM_WRITEFN>(0x00aff9f0);
+        m_pfnRead = reinterpret_cast<NIBINARYSTREAM_READFN>(&ForwardVTableCall);
+        m_pfnWrite = reinterpret_cast<NIBINARYSTREAM_WRITEFN>(&CallVirtualMethodAtOffset48);
     }
 }
 

@@ -190,7 +190,7 @@ struct AudioTlsState
     unsigned unk2B0;
     unsigned m_uiMemoryContext;
 };
-__declspec(thread) AudioTlsState threadData;
+extern __declspec(thread) AudioTlsState threadData;
 struct ScopedContext
 {
     unsigned previous;

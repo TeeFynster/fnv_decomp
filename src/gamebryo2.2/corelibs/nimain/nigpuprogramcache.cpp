@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define Destroy Destroy_fnv_00ee9070
+
 #include "../../../../include/MemoryManager.h"
 #include "../../../../include/NiStandardAllocator.h"
 #include "../../../../include/NiFile.h"

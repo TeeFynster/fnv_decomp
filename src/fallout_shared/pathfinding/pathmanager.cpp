@@ -1,3 +1,7 @@
+// Distinct original implementations share reconstructed identifiers.
+// Keep each matched body under its own address-qualified name.
+#define DestroyAndFree DestroyAndFree_fnv_006e9c90
+
 // fallout_shared/pathfinding/pathmanager.cpp: PathManager, PathingTaskData, Pathing, DelStandIn and more (65 functions)
 
 #include "../../../include/ActorPathingMessageQueue.h"

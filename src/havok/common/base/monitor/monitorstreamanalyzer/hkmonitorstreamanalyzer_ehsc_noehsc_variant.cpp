@@ -1609,10 +1609,10 @@ static __declspec(noinline) RecEntry* hkFindChildByName(RecBox* box, NameArg nam
         return box->unk30[0];
     return 0;
 }
-volatile int g_in_name;
-RecBox* volatile g_in_box;
-void* volatile g_out;
-void* volatile g_out2;
+extern volatile int g_in_name;
+extern RecBox* volatile g_in_box;
+extern void* volatile g_out;
+extern void* volatile g_out2;
 void CallTarget_e0cb80()
 {
     RecBox* box = g_in_box;
@@ -2481,9 +2481,9 @@ static __declspec(noinline) void printStatisticsByType(FUN_00e0d000* root, float
     }
     nodes.release();
 }
-volatile FUN_00e0d000* reportRoot;
-void* volatile reportStream;
-volatile float reportThreshold;
+extern volatile FUN_00e0d000* reportRoot;
+extern void* volatile reportStream;
+extern volatile float reportThreshold;
 void reportCaller()
 {
     printStatisticsByType((FUN_00e0d000*)reportRoot, reportThreshold, reportStream);

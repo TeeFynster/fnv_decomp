@@ -1,3 +1,6 @@
+void __cdecl Object_ForwardCall_00d2d460(int, int, int);
+extern "C" void __cdecl Object_HkAgent1nMachine_Destroy_Thunk(void*);
+
 
 // src/havok/physics/collide/agent3/bvtree3/hkpbvtreeagent3.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent3/bvtree3/hkpbvtreeagent3.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -20,9 +23,9 @@ void hkBvTreeAgent3_process_UpdateState_00d2d9d0(void* pObject)
     *(int*)((char*)pObject + 0x14) = 0;
     *(void**)((char*)pObject + 0x18) = (void*)&CallWithValueSource;
     *(void**)((char*)pObject + 0x1c) = (void*)&hkBvTreeAgent3_ProcessState_00d2d430;
-    *(int*)((char*)pObject + 0x20) = 0xd2d460;
+    *(int*)((char*)pObject + 0x20) = (int)&Object_ForwardCall_00d2d460;
     *(void**)((char*)pObject + 0x24) = (void*)&Object__hkAgent1nMachine_WarpTime_Thunk;
-    *(int*)((char*)pObject + 4) = 0xda6dc0;
+    *(int*)((char*)pObject + 4) = (int)&Object_HkAgent1nMachine_Destroy_Thunk;
     *(char*)((char*)pObject + 0x30) = 1;
 }
 

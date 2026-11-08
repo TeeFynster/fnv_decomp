@@ -1,3 +1,11 @@
+class SettingT_GameSettingCollection_;
+namespace fnv_008c7da0 { void __cdecl AILinearTaskThreadManager_AIThread1TaskFunc(); }
+namespace fnv_008c7f50 { void __cdecl AILinearTaskThreadManager_AIThread2TaskFunc(); }
+namespace fnv_008c7bd0 { void __cdecl AILinearTaskThreadManager_AIThreadCombined(); }
+extern "C" SettingT_GameSettingCollection_ DAT_011c3ea4;
+extern "C" SettingT_GameSettingCollection_ DAT_011dfb34;
+extern "C" SettingT_GameSettingCollection_ DAT_011dfb18;
+
 // fallout/ai/ailineartaskthreadmanager.cpp: AIThreadManager (21 functions)
 
 #include <new>
@@ -54,17 +62,17 @@ void AIThreadManager::StartRenderingTaskThread()
     for (; j <= 7; ++j)
         threadHandles2[j] = CreateEventA(0, 1, 0, 0);
 
-    if (*reinterpret_cast<int*>(((SettingT_GameSettingCollection_*)0x011c3ea4)->Int()) > 2)
+    if (*reinterpret_cast<int*>(DAT_011c3ea4.Int()) > 2)
     {
-        LaunchWorkerThread(AI_THREAD_1, *reinterpret_cast<int*>(((SettingT_GameSettingCollection_*)0x011dfb34)->Int()),
-                           (AIThreadFunction)0x008c7da0, "AI Linear Task Thread 1", (BSThread::StackSize)0x10000);
-        LaunchWorkerThread(AI_THREAD_2, *reinterpret_cast<int*>(((SettingT_GameSettingCollection_*)0x011dfb18)->Int()),
-                           (AIThreadFunction)0x008c7f50, "AI Linear Task Thread 2", (BSThread::StackSize)0x10000);
+        LaunchWorkerThread(AI_THREAD_1, *reinterpret_cast<int*>(DAT_011dfb34.Int()),
+                           (AIThreadFunction)&fnv_008c7da0::AILinearTaskThreadManager_AIThread1TaskFunc, "AI Linear Task Thread 1", (BSThread::StackSize)0x10000);
+        LaunchWorkerThread(AI_THREAD_2, *reinterpret_cast<int*>(DAT_011dfb18.Int()),
+                           (AIThreadFunction)&fnv_008c7f50::AILinearTaskThreadManager_AIThread2TaskFunc, "AI Linear Task Thread 2", (BSThread::StackSize)0x10000);
     }
     else
     {
-        LaunchWorkerThread(AI_THREAD_1, *reinterpret_cast<int*>(((SettingT_GameSettingCollection_*)0x011dfb34)->Int()),
-                           (AIThreadFunction)0x008c7bd0, "AI Linear Task Thread", (BSThread::StackSize)0x10000);
+        LaunchWorkerThread(AI_THREAD_1, *reinterpret_cast<int*>(DAT_011dfb34.Int()),
+                           (AIThreadFunction)&fnv_008c7bd0::AILinearTaskThreadManager_AIThreadCombined, "AI Linear Task Thread", (BSThread::StackSize)0x10000);
     }
 
     gPreferredMoveMode = ((ActorMover*)m_pTaskThreads[0])->GetCurrentMoveModeType();

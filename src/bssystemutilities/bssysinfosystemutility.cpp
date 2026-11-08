@@ -2,7 +2,7 @@
 
 #include "layout_support.h"
 #include "../../include/BSSysInfoSystemUtility.h"
-#include "../../include/MemoryManager.h"
+#include "../../include/MemoryManagerGlobals.h"
 
 // @fnv 0x00af3b70
 void BSSysInfoSystemUtility::Initialize()
@@ -14,7 +14,7 @@ void BSSysInfoSystemUtility::Destroy()
     m_eLanguage = BSSysInfoSystemUtility::LANGUAGE_UNKNOWN;
 }
 
-MemoryManager g_memoryManager;
+
 
 // The shared header does not declare the non-virtual destructor.
 void DestroyBSSysInfoSystemUtility();

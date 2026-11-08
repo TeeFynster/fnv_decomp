@@ -204,7 +204,7 @@ struct FUN_00453500_shell
     void BGSSaveLoadGame_SetDeferInitForms(bool set);
 };
 struct BSAudio;
-BSAudio* DAT_011f6d98;
+extern BSAudio* DAT_011f6d98;
 BSAudio* BSAudio_QInstance();
 extern unsigned char DAT_011f9427;
 void BSShaderManager_SetInterior(unsigned char value);

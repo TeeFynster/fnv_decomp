@@ -5870,7 +5870,7 @@ struct BoundaryTable {
 
 extern double _gModifierZero;
 extern float DAT_0104da4c;
-extern const float runtimeFloatSettingDefault1085 = 1.1f;
+__declspec(selectany) extern const float runtimeFloatSettingDefault1085 = 1.1f;
 
 inline void ApplyBound(float& out, float value) {
     out = value;

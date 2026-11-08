@@ -116,7 +116,7 @@ float __cdecl FUN_00476b70(float fMin, float fScaledValue);
 bool __cdecl FUN_0082eca0(BGSImpactData* pkImpact, NiPoint3 kPos, float fScale);
 extern float g_fFootstepRand_0101e2bc;
 static const char s_szBabyLand[] = "FSTBabyLand";
-extern const char g_szFootstepEnd[] = "";
+__declspec(selectany) extern const char g_szFootstepEnd[] = "";
 void __cdecl PlayFootstepImpact(Actor* pActor, int iMaterial);
 struct SetObj
 {

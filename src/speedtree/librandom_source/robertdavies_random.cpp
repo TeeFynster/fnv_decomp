@@ -28,7 +28,7 @@ PosGen::PosGen()
 // @fnv 0x00b43ce0
 float Normal::Density(volatile float value) const
 {
-    return (float)fabs(value) > 8.0 ? 0.0 : 0.398942280 * (float)exp((float)((double)value * -value / 2.0));
+    return (float)fabs(value) > 8.0 ? 0.0 : 0.3989422917366028 * (float)exp((float)((double)value * -value / 2.0));
 }
 
 // @fnv 0x00b43310
@@ -42,7 +42,7 @@ float Random::Raw()
     if (iseed <= 0)
         iseed += 2147483647L;
     RandomSeed = (double)iseed;
-    return (float)RandomSeed * 4.656612875e-10;
+    return (float)RandomSeed * 4.656612873077393e-10;
 }
 
 // @fnv 0x00b43ae0

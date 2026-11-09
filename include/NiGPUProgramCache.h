@@ -59,7 +59,7 @@ public:
     virtual const char* GetShaderType();
     virtual bool LoadCacheFile();
     virtual bool CanCreateDirectory();
-    virtual bool vf28();
+    virtual bool ClearCachedPrograms();
     virtual char IsLoaded_00ee8aa0();
     virtual unsigned char IsLocked_00ee8ab0();
     virtual bool RemoveMissingKeys(void* keys, void* entries);

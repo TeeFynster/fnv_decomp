@@ -383,8 +383,8 @@ struct BooleanKey
     }
 };
 // @fnv 0x00a2cdc0
-// src: GUESS 0x00a2cdc0 (confidence: low)
-BooleanKey* __cdecl NiStream_ProcessEntries_00a2cdc0(NiStream& kStream, unsigned int uiElementCount)
+// src: GUESS 0x00a2cdc0 (confidence: high)
+BooleanKey* __cdecl LoadBooleanKeyArray(NiStream& kStream, unsigned int uiElementCount)
 {
     BooleanKey* p = new BooleanKey[uiElementCount];
     for (unsigned int i = 0; i < uiElementCount; ++i)

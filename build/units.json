@@ -297168,7 +297168,7 @@
    "functions": [
     {
      "address": "0x00a2cdc0",
-     "symbol": "?NiStream_ProcessEntries_00a2cdc0@fnv_00a2cdc0@@YAPAUBooleanKey@1@AAUNiStream@@I@Z",
+     "symbol": "?LoadBooleanKeyArray@fnv_00a2cdc0@@YAPAUBooleanKey@1@AAUNiStream@@I@Z",
      "size": 95
     },
     {
@@ -297521,7 +297521,7 @@
     "??2BSFadeNode@fnv_00e8ff60@@SAPAXI@Z": "0x00aa13e0",
     "??2BSFadeNode@fnv_00e916d0@@SAPAXI@Z": "0x00aa13e0",
     "?CreateRenderer@fnv_00e91590@@YAPAURenderer_e91590@1@HPAUCreateDesc@1@_N@Z": "0x00e91590",
-    "?NiStream_ProcessEntries_00a2cdc0@fnv_00a2cdc0@@YAPAUBooleanKey@1@AAUNiStream@1@I@Z": "0x00a2cdc0",
+    "?LoadBooleanKeyArray@fnv_00a2cdc0@@YAPAUBooleanKey@1@AAUNiStream@1@I@Z": "0x00a2cdc0",
     "?ProcessAndReturnValue_00e8fd80@Mid_00e90080@@QAEXXZ": "0x00e8fd80",
     "?SelectFormatTileValue@@YAHPAUPair@@PAUCounts@@@Z": "0x00e89ed0",
     "?SetSize@StrArr@fnv_00e91a90@@QAEXI@Z": "0x0096ad30",
@@ -309656,7 +309656,7 @@
     },
     {
      "address": "0x00ee8e70",
-     "symbol": "?vf28@NiGPUProgramCache@@UAE_NXZ",
+     "symbol": "?ClearCachedPrograms@NiGPUProgramCache@@UAE_NXZ",
      "size": 19
     },
     {
@@ -393235,7 +393235,7 @@
     "?DAT_011f3c8c@@3HA": "0x011f3c8c",
     "?DAT_011f3bfc@@3HA": "0x011f3bfc",
     "?DAT_011f3e3c@@3PAXA": "0x011f3e3c",
-    "?NiStream_ProcessEntries_00a2cdc0@@YAXXZ": "0x00a2cdc0",
+    "?LoadBooleanKeyArray@@YAXXZ": "0x00a2cdc0",
     "?DAT_011f3adc@@3PAXA": "0x011f3adc",
     "?Object_WriteEnabledFlags@@YAXXZ": "0x00a2cc60",
     "?DAT_011f3a4c@@3PAXA": "0x011f3a4c",

@@ -67,7 +67,8 @@ void* __thiscall FUN_00ee9ca0_shell::FUN_00ee9ca0(unsigned int flags)
 }
 
 // @fnv 0x00ee8e70
-bool __thiscall NiGPUProgramCache::vf28()
+// src: GUESS 0x00ee8e70 (confidence: high)
+bool __thiscall NiGPUProgramCache::ClearCachedPrograms()
 {
     m_kObjectMap.RemoveAll();
     m_bLoadComplete = false;
@@ -273,7 +274,7 @@ void NiGPUProgramCache::UpdatePathString() throw()
                 InterlockedDecrement((long*)(rel - 8));
         }
         if (old != m_pcCacheFileName.m_kHandle)
-            vf28();
+            ClearCachedPrograms();
         if (old != _EmptyFS)
             InterlockedDecrement((long*)(old - 8));
     }

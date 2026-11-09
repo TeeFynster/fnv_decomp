@@ -62,7 +62,7 @@ import tempfile
 
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
-from compare import Coff, LITERAL, own_data    # noqa: E402
+from compare import Coff, LITERAL, data_definition    # noqa: E402
 from build_and_match import recipe_names       # noqa: E402
 
 RECIPE = 'build/units.json'
@@ -423,19 +423,62 @@ def fingerprint(obj, unit, names, unwind=None):
                 raise ValueError('%s: one object entry stands for two functions' % n)
     eh_names = dict(names); eh_names.update(local)
     unwind = unwind or {}
-    memo = {}
+    memo, data_memo = {}, {}
+    data_nodes = 0
 
-    def target(sym, mappings, addend=0):
+    def data_digest(sym, mappings, active=()):
+        """Initializer contents, including the targets and addends of pointer fields.
+
+        Cycle references are relative to this traversal path. Neither compiler
+        symbol names nor section numbers enter the digest of bound data, so an
+        ordinary rename or an alias for the same object keeps the same meaning.
+        """
+        nonlocal data_nodes
+        own = data_definition(coff, sym)
+        if own is None:
+            raise ValueError('expected owned data: %s' % sym['name'])
+        raw, relocs = own
+        key = (sym['section'], sym['value'], raw if sym['section'] <= 0 else None)
+        if key in active:
+            return ('cycle', len(active) - active.index(key))
+        if len(active) >= 128:
+            raise ValueError('data initializer graph exceeds the depth limit')
+        cache = (id(mappings), key, active)
+        if cache not in data_memo:
+            data_nodes += 1
+            if data_nodes > 10000:
+                raise ValueError('data initializer graph exceeds the node limit')
+            occupied = set()
+            for offset, kind, _ in relocs:
+                if kind not in (0x06, 0x07, 0x0b, 0x14):
+                    raise ValueError('unsupported data relocation kind %d' % kind)
+                field = set(range(offset, offset + 4))
+                if offset < 0 or offset + 4 > len(raw) or occupied & field:
+                    raise ValueError('overlapping or out-of-range data relocation')
+                occupied.update(field)
+            data, rest = linked(raw, relocs,
+                                lambda target_sym, addend: target(target_sym, mappings, addend, active + (key,)),
+                                mappings.get(sym['name']))
+            data_memo[cache] = digest(data, rest)
+        return data_memo[cache]
+
+    def target(sym, mappings, addend=0, active=()):
         """What a relocation to sym + addend resolves to, in the order compare.py and build_and_match.py resolve it:
         ('address', the original address including the addend) or a description."""
-        own = own_data(coff, sym)
+        own = data_definition(coff, sym)
         if own is not None and LITERAL.match(sym['name']):
             # a literal is placed by its bytes, as compare.py places it: its value is what counts, never a binding
+            if own[1]:
+                raise ValueError('a literal contains relocations: %s' % sym['name'])
             return ('literal', own[0], addend)
         if sym['name'] in mappings:
             if own is not None:   # data the unit defines (a global's initializer): its bytes are part of the code's
-                return ('address', mappings[sym['name']] + addend, ('data', own[0]))   # meaning
+                return ('address', mappings[sym['name']] + addend, ('data', data_digest(sym, mappings, active)))
             return ('address', mappings[sym['name']] + addend)
+        if own is not None:
+            # A nonliteral object without an original address is not interchangeable
+            # with another object just because their initial bytes happen to match.
+            return ('unbound-data', sym['name'], data_digest(sym, mappings, active), addend)
         sec = sym['section']
         if sec > 0:
             point = sym['value'] + addend

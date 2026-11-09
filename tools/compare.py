@@ -107,6 +107,24 @@ class Pe:
                 return self.data[offset+rva-start:offset+rva-start+size]
         raise ValueError('original range not backed by PE file bytes')
 
+    def read_data(self, address, size):
+        """Initialized image data, including the loader's zero-filled part of a section.
+
+        Code comparisons deliberately keep using read(): virtual zero-fill is not evidence for code bytes.
+        """
+        if size < 0:
+            raise ValueError('negative data range')
+        rva = address - self.base
+        for start, virtual_size, rawsize, offset in self.sections:
+            if start <= rva and rva + size <= start + max(virtual_size, rawsize):
+                relative = rva - start
+                backed = max(0, min(size, rawsize - relative))
+                data = self.data[offset + relative:offset + relative + backed]
+                if len(data) != backed:
+                    raise ValueError('truncated original data range')
+                return data + bytes(size - backed)
+        raise ValueError('original data range outside image sections')
+
 
 # Literals: floating-point constants (__real@, __xmm@: the name spells the bytes) and string literals (??_C@, $SG).
 LITERAL = re.compile(r'^(\$SG\d+$|\?\?_C@|__real@[0-9a-f]+$|__xmm@[0-9a-f]+$)')
@@ -114,19 +132,22 @@ LITERAL = re.compile(r'^(\$SG\d+$|\?\?_C@|__real@[0-9a-f]+$|__xmm@[0-9a-f]+$)')
 RTTI_NAME = re.compile(r'^\?\?_R0')
 
 
-def own_data(coff, symbol):
-    """(bytes, masked offsets) that the object gives a data symbol, or None when it gives none (code, an external,
-    uninitialized data). A floating-point literal is the bytes its name spells; a string literal runs through its
-    terminator; any other symbol runs to the next symbol in its section, without trailing zero bytes (alignment
-    padding, or where the next object starts: the object does not say how long a variable is). Relocated fields are
-    masked: they hold link-time addresses, not the unit's data."""
+def data_definition(coff, symbol):
+    """A data symbol's (raw bytes, relocations), or None for code or an external.
+
+    Relocations are (offset within these bytes, kind, target symbol); their addends remain in the raw bytes.
+    Generic data conservatively extends to the next symbol or section end. COFF does not record every variable's
+    size, so those bytes can include alignment padding; discarding zeros would also discard real initializer bytes.
+    BSS is a definition with zero bytes, not an external without an initializer. MSVC string symbols encode their
+    byte length, including embedded NULs and the terminator. Older $SG labels use their complete symbol extent.
+    """
     name = symbol['name']
     if name.startswith(('__real@', '__xmm@')):
-        return bytes.fromhex(name.split('@', 1)[1])[::-1], set()
+        return bytes.fromhex(name.split('@', 1)[1])[::-1], []
     if symbol['section'] <= 0:
         return None
     sec = coff.sections[symbol['section']]
-    if sec['flags'] & 0x20000020 or sec['flags'] & 0x80:   # code, or uninitialized data
+    if sec['flags'] & 0x20000020:   # code
         return None
     start = symbol['value']
     starts = coff.__dict__.setdefault('_starts', {})
@@ -134,28 +155,126 @@ def own_data(coff, symbol):
         starts[symbol['section']] = sorted({s['value'] for s in coff.symbols.values() if s['section'] == symbol['section']})
     later = [v for v in starts[symbol['section']] if v > start]
     end = later[0] if later else len(sec['data'])
-    mask = {o - start + i for o, _, _ in sec['relocs'] if start <= o < end for i in range(4)}
-    data = bytes(0 if i in mask else b for i, b in enumerate(sec['data'][start:end]))
-    if LITERAL.match(name):   # a string: its characters and one terminator (two bytes for a wide ??_C@_1 literal)
-        core = data.rstrip(b'\0')
-        width = 2 if name.startswith('??_C@_1') else 1
-        core += b'\0' * (len(core) % width)
-        return core + b'\0' * width, set()
-    data = data.rstrip(b'\0')
-    return data, {i for i in mask if i < len(data)}
+    length = re.match(r'^\?\?_C@_[01]([0-9]|[A-P]+@)', name)
+    if length:
+        encoded = length[1]
+        size = int(encoded) + 1 if encoded.isdigit() else int(''.join('%x' % (ord(c) - ord('A'))
+                                                                                  for c in encoded[:-1]), 16)
+        end = start + size
+    if not 0 <= start <= end <= len(sec['data']):
+        raise ValueError('data definition outside its object section: ' + name)
+    relocs = []
+    previous_end = 0
+    for offset, index, kind in sorted(sec['relocs']):
+        if offset < 0 or offset + 4 > len(sec['data']):
+            raise ValueError('relocation outside data section: ' + name)
+        if offset < end and offset + 4 > start:
+            relative = offset - start
+            if relative < 0 or relative + 4 > end - start:
+                raise ValueError('relocation crosses data definition boundary: ' + name)
+            if relative < previous_end:
+                raise ValueError('overlapping data relocations: ' + name)
+            if kind not in (0x06, 0x07, 0x0B, 0x14):
+                raise ValueError('unsupported initializer relocation kind %d: %s' % (kind, name))
+            previous_end = relative + 4
+            relocs.append((relative, kind, coff.symbols[index]))
+    if LITERAL.match(name) and relocs:
+        raise ValueError('literal contains initializer relocations: ' + name)
+    return sec['data'][start:end], relocs
+
+
+def own_data(coff, symbol):
+    """Compatibility view: (bytes with relocated fields zeroed, masked offsets).
+
+    Consumers validating addresses or computing fingerprints must also account for data_definition's relocations.
+    """
+    definition = data_definition(coff, symbol)
+    if definition is None:
+        return None
+    data, relocs = definition
+    mask = {o + i for o, _, _ in relocs for i in range(4)}
+    return bytes(0 if i in mask else b for i, b in enumerate(data)), mask
 
 
 def data_differs(pe, own, at):
     """Bytes of `own` (from own_data) that the game does not hold at `at`; None when the range is not in the file."""
     data, mask = own
     try:
-        original = pe.read(at, len(data))
+        original = getattr(pe, 'read_data', pe.read)(at, len(data))
     except ValueError:
         return None
     return [i for i in range(len(data)) if i not in mask and data[i] != original[i]]
 
 
-def compare(coff, pe, manifest, spans=None):
+def check_data(coff, pe, symbol, at, resolve, seen=None, depth=0):
+    """Check owned data and its relocation graph; return (errors, RTTI-name warnings).
+
+    resolve(target, addend) has the same contract as compare's relocation resolver. Only literals may be placed by
+    their observed bytes: an unknown ordinary initializer target cannot silently become an inferred address.
+    Cycles terminate after checking each (object definition, image address) once.
+    """
+    seen = set() if seen is None else seen
+    key = (symbol['section'], symbol['value'], symbol['name'], at)
+    if key in seen:
+        return [], []
+    if depth >= 128 or len(seen) >= 10000:
+        return ['data relocation graph exceeds the verification limit'], []
+    seen.add(key)
+    definition = data_definition(coff, symbol)
+    if definition is None:
+        return [], []
+    data, relocs = definition
+    errors, warnings = [], []
+    try:
+        original = getattr(pe, 'read_data', pe.read)(at, len(data))
+    except ValueError as error:
+        return ['data %s at 0x%08x: %s' % (symbol['name'], at, error)], []
+    mask = {offset + i for offset, _, _ in relocs for i in range(4)}
+    if len(original) != len(data):
+        return ['data %s at 0x%08x: truncated original data range' % (symbol['name'], at)], []
+    bad = [i for i in range(len(data)) if i not in mask and data[i] != original[i]]
+    if bad:
+        message = 'data %s at 0x%08x: the game holds other bytes there (%d of %d bytes differ)' % (
+            symbol['name'], at, len(bad), len(data))
+        # Only the type-name payload has the existing warning exception; corrupt pointer/header fields are errors.
+        (warnings if RTTI_NAME.match(symbol['name']) and all(i >= 8 for i in bad) else errors).append(message)
+    for offset, kind, target in relocs:
+        try:
+            addend = struct.unpack_from('<i' if kind == 0x14 else '<I', data, offset)[0]
+            observed = struct.unpack_from('<I', original, offset)[0]
+            if kind == 0x14:
+                observed = (at + offset + 4 + struct.unpack_from('<i', original, offset)[0]) & 0xffffffff
+            elif kind == 0x07:
+                observed = (observed + pe.base) & 0xffffffff
+            elif kind not in (0x06, 0x0B):
+                raise ValueError('unsupported initializer relocation kind %d' % kind)
+            child = data_definition(coff, target)
+            by_content = child is not None and LITERAL.match(target['name']) is not None
+            if kind == 0x0B:
+                target_at = resolve(target, 0)
+                if target_at is None:
+                    raise ValueError('unresolved initializer target: ' + target['name'])
+                expected = pe.secrel(target_at + addend)
+            elif by_content:
+                expected = observed
+                target_at = (observed - addend) & 0xffffffff
+            else:
+                expected = resolve(target, addend)
+                if expected is None:
+                    raise ValueError('unresolved initializer target: ' + target['name'])
+                target_at = (expected - addend) & 0xffffffff
+            if expected & 0xffffffff != observed:
+                raise ValueError('initializer target %s differs: yours resolves to 0x%08x, original 0x%08x' % (
+                    target['name'], expected & 0xffffffff, observed))
+            if child is not None:
+                more, notes = check_data(coff, pe, target, target_at, resolve, seen, depth + 1)
+                errors.extend(more); warnings.extend(notes)
+        except (ValueError, KeyError, struct.error) as error:
+            errors.append('data %s at +0x%x: %s' % (symbol['name'], offset, error))
+    return errors, warnings
+
+
+def compare(coff, pe, manifest, spans=None, data_names=None):
     if spans is not None:
         for spec in manifest['functions']:
             canonical = spans.size(number(spec['address']))
@@ -192,6 +311,16 @@ def compare(coff, pe, manifest, spans=None):
         if symbol['section'] == -1:
             return symbol['value'] + addend
         raise ValueError('unresolved original symbol: ' + symbol['name'])
+
+    def resolve_data(symbol, addend):
+        # Initializer graphs can refer to a canonical symbol bound by another unit. These names must come from
+        # the recipe's globally unambiguous bindings; local bindings and annotated placements retain precedence.
+        try:
+            return resolve(symbol, addend)
+        except ValueError:
+            if data_names is not None and symbol['name'] in data_names:
+                return number(data_names[symbol['name']]) + addend
+            raise
 
     reports = []
     for spec in functions:
@@ -258,19 +387,14 @@ def compare(coff, pe, manifest, spans=None):
                 if expected != observed:
                     raise ValueError('original relocation target differs at +0x%x (%s): yours resolves to 0x%08x, original 0x%08x'
                                      % (relative, target_symbol['name'], expected, observed))
-                if own is not None and kind != 0x0B:
+                if own is not None:
                     # data the unit defines itself (a literal, a global's initializer, an RTTI descriptor): the game
                     # must hold the same bytes where the original refers
-                    at = (observed - used) & 0xffffffff
-                    bad = data_differs(pe, own, at)
-                    if bad is None or bad:
-                        what = ('%s %s at 0x%08x: the game holds other bytes there%s'
-                                % ('literal' if by_content else 'data', name, at,
-                                   '' if bad is None else ' (%d of %d bytes differ)' % (len(bad), len(own[0]))))
-                        if RTTI_NAME.match(name):
-                            warnings.append(what)   # a type's class-key or namespace: reported, not yet counted
-                        else:
-                            raise ValueError(what)
+                    at = ((pe.tls_start() if kind == 0x0B else 0) + observed - used) & 0xffffffff
+                    bad, notes = check_data(coff, pe, target_symbol, at, resolve_data)
+                    warnings.extend(notes)
+                    if bad:
+                        raise ValueError('; '.join(bad))
                 mask.update(range(relative, relative+4))
                 record['match'] = True
             except (ValueError, KeyError, struct.error) as error:

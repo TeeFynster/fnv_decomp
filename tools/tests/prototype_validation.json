@@ -1,0 +1,103 @@
+{
+  "status": "DRAFT PROTOTYPE - NOT MERGE READY",
+  "date": "2026-11-08",
+  "reviewed_pull_request": "https://github.com/momusdigital/fnv_decomp/pull/36",
+  "base_head": "c13ef6ac61e6f6ab4df007dcaa41c3bcb6215627",
+  "main_ancestor": "91e1b6e8d8bb0f9a33e8cf88e77268757449e0a6",
+  "validation": {
+    "synthetic_tool_regressions": {
+      "passed": 39,
+      "failed": 0,
+      "command": "python -m unittest discover -s tools/tests"
+    },
+    "native_vc2008_fixture_checks": {
+      "passed_cases": 10,
+      "paired_mutations_rejected_by_both_oracles": 4,
+      "unchanged_controls_accepted": 4,
+      "zero_and_scalar_extent_cases_rejected": 2,
+      "original_image_input": false
+    },
+    "full_owned_image_build": {
+      "exit_code": 1,
+      "jobs": 6,
+      "summary": {
+        "units": 2989,
+        "status": {
+          "ok": 2027,
+          "mismatch": 962
+        },
+        "functions": 68667,
+        "matched_functions": 65553,
+        "bytes": 11458254,
+        "matched_bytes": 10727601,
+        "eh_tails": 1954,
+        "matched_eh_tails": 1440,
+        "eh_tail_bytes": 138526,
+        "matched_eh_tail_bytes": 103995,
+        "eh_tails_by_inferred_binding": 256,
+        "eh_inferred_names": 686,
+        "eh_inferred_conflicts": 0,
+        "data_warnings": 49
+      },
+      "all_tool_hashes_unchanged": true,
+      "source_tool_hashes": {
+        "compare.py": "df8afe0a9d2e5ce00417674789c9f1c61176dd5accb400461db348701c3fbd74",
+        "compare_builds.py": "9a685847d76a93de1231f766999b10ff9dc5b404bae2e5f8424e26c4e866f880",
+        "build_and_match.py": "56b058d6cde43818a178bd79edaafbfa172d8092d8edd6ca1e6d0178c766a5f4",
+        "msvc.py": "9414b5d51e12aa093450ec600abcec2a98307519ceab1069f48d303bf71da464"
+      },
+      "error_record_categories": {
+        "unresolved_initializer_symbols": 3698,
+        "other": 17,
+        "raw_data_or_extent_difference": 248
+      },
+      "distinct_unresolved_initializer_names": 7228,
+      "interpretation": "Acceptance counts include initializer validation. Rejection does not itself establish a changed function machine-code body; EH failures may cascade from rejected parent function/data validation."
+    }
+  },
+  "rollout_blockers": [
+    {
+      "kind": "missing_initializer_identities",
+      "example_source": "src/fallout/ai/combat/grenadeprojectile.cpp",
+      "remaining_unresolved_names_after_unique_global_recipe_fallback": 174,
+      "note": "Compiler-emitted vtable member identities remain absent from the recipe. Unknown candidates fail closed; no addresses are inferred from a candidate image."
+    },
+    {
+      "kind": "known_vtable_alias_disagreements",
+      "source": "src/imagespaceshaderblur_h_unit.cpp",
+      "affected_function_addresses": [
+        "0x00b8e460",
+        "0x00b8e940",
+        "0x00b8eae0",
+        "0x00b8ec80"
+      ],
+      "note": "Vtable scalar-deleter fields disagree with already-bound function addresses. An alias fallback cannot resolve an existing identity conflict."
+    },
+    {
+      "kind": "ambiguous_data_extents_and_padding",
+      "source": "src/bgsterrainnode.cpp",
+      "symbol": "_kBGSTerrainNodeFileLabel",
+      "address": "0x0106e4e0",
+      "exact_source_array_size_including_terminator": 92,
+      "generic_coff_span": 96,
+      "all_92_source_bytes_match_original": true,
+      "note": "The extra four padding bytes cause a false rejection. Trimming arbitrary trailing zeros would reopen the proven scalar-initializer gap."
+    },
+    {
+      "kind": "partial_tls_storage_views",
+      "example_source": "src/bsaudio/bsaudio.cpp",
+      "address": "0x01272000",
+      "observed_source_view_extents": [
+        696,
+        704
+      ],
+      "differing_offsets_count": 12,
+      "note": "Partial TLS stand-ins do not establish complete original initialization. This needs source/layout review rather than masking."
+    }
+  ],
+  "scope_limits": [
+    "No typed-extent parser, inferred initializer registry, baseline source rewrite, broad metadata masking, or candidate-image address inference was added.",
+    "The authored pointer/scalar regressions are closed, but baseline metadata/extent issues require owner decisions and further work before rollout.",
+    "This summary contains repository identifiers, addresses, counts, and checker-source hashes only; no original image bytes, disassembly, or game file."
+  ]
+}

@@ -207,7 +207,7 @@ def check_unit(unit, pe, spans, scratch, names):
                         literal_symbols=unit.get('literal_symbols', []))
         try:
             coff = Coff(obj)
-            rows = compare(coff, pe, manifest, spans)
+            rows = compare(coff, pe, manifest, spans, data_names=names)
         except Exception as e:   # a missing symbol, a span that disagrees: report it, keep going
             return dict(base, status='compare-error', error=str(e)[:300])
         bad = [dict(address=x['address'], size=x['size'], differing_bytes=len(x['byte_differences']),

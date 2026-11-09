@@ -1,5 +1,10 @@
 # FNV decompilation
 
+**Draft checker experiment:** this branch closes synthetic initializer-checking gaps, but is not ready to merge.
+The full local baseline check accepts 2,027 of 2,989 units. Missing initializer bindings, ambiguous data extents,
+existing vtable alias disagreements and partial TLS views still need maintainer decisions. The function source is
+unchanged. See [the validation summary](tools/tests/prototype_validation.json) for the test counts and limits.
+
 The decompilation of FNV, the Steam release for PC (version 1.4.0.525): C++ source code rebuilt function by function
 from the game's executable. Built with the compilers the game was built with, every function listed in
 `build/units.json` compiles to the same bytes as the original.
@@ -174,6 +179,13 @@ With the compilers set up (see "What you need"), commit your change, then compar
     python3 tools/compare_builds.py report --plan ../plan.json ../result.json
 
 When `plan` reports no units to build, skip `shard` and run `report` without `../result.json`.
+
+The checker has synthetic regression tests for owned data, literals, pointer initializers and relocation handling:
+
+    python3 -m unittest discover -s tools/tests -p "test_*.py" -v
+
+These use generated fixtures and require Python only. They do not establish that the whole source tree matches the
+game; changes to the checker still need the full build against the owner's executable.
 
 ## Status
 
